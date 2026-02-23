@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Video</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #cccccc;
+        }
+
+        .player-container {
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1);
+            margin-bottom: 40px;
+            aspect-ratio: 16 / 9;
+            border: 1px solid #333333;
+        }
+
+        .player-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444444;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .info-card p {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #ffffff;
+        }
+
+        .feature-item h4 {
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .feature-item p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid #444444;
+            margin-top: 40px;
+            color: #999999;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+
+        footer a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #dddddd;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .player-container {
+                margin-bottom: 30px;
+            }
+
+            .info-section {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Streaming Video</h1>
+            <p>Nikmati kualitas terbaik dengan teknologi streaming terkini</p>
+        </header>
+
+        <div class="player-container">
+            <iframe width="1280" height="720" src="https://lixbox.net/e/t0fkRTIT" frameborder="0" allowfullscreen></iframe>
+        </div>
+
+        <div class="info-section">
+            <div class="info-card">
+                <h3>Nyalakan Ads-Block</h3>
+                <p>atau gunakan brave browser</p>
+            </div>
+            <div class="info-card">
+                <h3>Nyalakan Ads-Block</h3>
+                <p>atau gunakan brave browser</p>
+            </div>
+            <div class="info-card">
+                <h3>Nyalakan Ads-Block</h3>
+                <p>atau gunakan brave browser</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Streaming Platform. Semua hak cipta dilindungi.</p>
+            <p>
+                <a href="#privasi">Privasi</a> | 
+                <a href="#syarat">Syarat & Ketentuan</a> | 
+                <a href="#kontak">Hubungi Kami</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
