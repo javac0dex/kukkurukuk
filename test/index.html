@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JKT48 Video Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font mirip iOS */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Styling panah dropdown agar lebih clean */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+    </style>
+</head>
+<body class="bg-pink-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="relative w-full max-w-md p-8 bg-white/60 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] rounded-3xl overflow-hidden">
+        
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-red-400 rounded-full mix-blend-multiply filter blur-2xl opacity-30"></div>
+        <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30"></div>
+
+        <div class="relative z-10">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6 tracking-tight">JKTVID</h2>
+
+            <div class="flex items-center justify-center mb-6 text-sm text-red-600 font-medium bg-red-100/50 py-2 px-3 rounded-xl border border-red-200/50 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Wajib sudah login di jkt48.com & berstatus OFC</span>
+            </div>
+            
+            <form id="jktForm" class="space-y-5">
+                <div>
+                    <label for="videoType" class="block text-sm font-semibold text-gray-700 mb-1 ml-1">Tipe Video</label>
+                    <select id="videoType" class="w-full bg-white/60 border border-white/50 text-gray-800 text-sm rounded-xl focus:ring-2 focus:ring-red-400 focus:outline-none block p-3 backdrop-blur-sm transition-all shadow-sm cursor-pointer">
+                        <option value="birthday">Birthday (Pilih Member)</option>
+                        <option value="lumina">Lumina (Input ID/URL)</option>
+                    </select>
+                </div>
+
+                <div id="groupBirthday">
+                    <label for="memberSelect" class="block text-sm font-semibold text-gray-700 mb-1 ml-1">Pilih Member</label>
+                    <div id="loadingText" class="text-xs text-red-500 font-semibold mb-2 ml-1 animate-pulse hidden">Memuat data dari jkt48.com... ⏳</div>
+                    <select id="memberSelect" required class="w-full bg-white/60 border border-white/50 text-gray-800 text-sm rounded-xl focus:ring-2 focus:ring-red-400 focus:outline-none block p-3 backdrop-blur-sm transition-all shadow-sm cursor-pointer">
+                        <option value="">-- Sedang mengambil data... --</option>
+                    </select>
+                </div>
+
+                <div id="groupLumina" class="hidden">
+                    <label for="videoId" class="block text-sm font-semibold text-gray-700 mb-1 ml-1">ID atau URL Lumina</label>
+                    <input type="text" id="videoId" placeholder="Ketik ID atau Paste URL di sini..." class="w-full bg-white/60 border border-white/50 text-gray-800 text-sm rounded-xl focus:ring-2 focus:ring-red-400 focus:outline-none block p-3 backdrop-blur-sm transition-all shadow-sm placeholder-gray-500">
+                    <p class="text-xs text-gray-500 mt-2 ml-1">Paste link penuh Lumina, ID otomatis diambil!</p>
+                </div>
+
+                <button type="submit" id="btnSubmit" disabled class="w-full mt-4 text-white bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold rounded-xl text-md px-5 py-3.5 text-center shadow-[0_4px_14px_0_rgba(239,68,68,0.39)] hover:shadow-[0_6px_20px_rgba(239,68,68,0.23)] transition-all duration-300 ease-in-out transform hover:-translate-y-0.5">
+                    Download
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const videoTypeSelect = document.getElementById('videoType');
+        const groupBirthday = document.getElementById('groupBirthday');
+        const groupLumina = document.getElementById('groupLumina');
+        const memberSelect = document.getElementById('memberSelect');
+        const videoIdInput = document.getElementById('videoId');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const loadingText = document.getElementById('loadingText');
+
+        videoTypeSelect.addEventListener('change', function() {
+            if (this.value === 'birthday') {
+                groupBirthday.classList.remove('hidden');
+                memberSelect.setAttribute('required', 'required');
+                
+                groupLumina.classList.add('hidden');
+                videoIdInput.removeAttribute('required');
+            } else {
+                groupLumina.classList.remove('hidden');
+                videoIdInput.setAttribute('required', 'required');
+                
+                groupBirthday.classList.add('hidden');
+                memberSelect.removeAttribute('required');
+            }
+        });
+
+        videoIdInput.addEventListener('input', function(e) {
+            let val = e.target.value;
+            const idMatch = val.match(/\/id\/(\d+)/);
+            if (idMatch && idMatch[1]) {
+                e.target.value = idMatch[1];
+            }
+        });
+
+        async function fetchMembersLive() {
+            loadingText.classList.remove('hidden');
+            memberSelect.disabled = true;
+
+            try {
+                const proxyUrl = 'https://proxy.jeffe.workers.dev/?https://jkt48.com/member/list?lang=id';
+                
+                const response = await fetch(proxyUrl);
+                const htmlText = await response.text(); 
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                
+                const memberLinks = doc.querySelectorAll('a[href*="/member/detail/id/"]');
+                const members = [];
+                const seenIds = new Set();
+
+                memberLinks.forEach(link => {
+                    const href = link.getAttribute('href');
+                    const match = href.match(/\/id\/(\d+)/);
+                    if (match) {
+                        const id = match[1];
+                        
+                        const rawName = link.innerHTML
+                            .replace(/<br\s*\/?>/gi, ' ')
+                            .replace(/<[^>]+>/g, '');
+                        
+                        const name = rawName.trim().replace(/\s+/g, ' ');
+                        
+                        if (name && !seenIds.has(id)) {
+                            members.push({ id, name });
+                            seenIds.add(id);
+                        }
+                    }
+                });
+
+                members.sort((a, b) => a.name.localeCompare(b.name));
+
+                if (members.length > 0) {
+                    memberSelect.innerHTML = '<option value="" disabled selected>-- Silakan Pilih Member --</option>';
+                    members.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.id;
+                        option.textContent = m.name;
+                        memberSelect.appendChild(option);
+                    });
+                    btnSubmit.disabled = false;
+                } else {
+                    memberSelect.innerHTML = '<option value="">Gagal menemukan data member</option>';
+                }
+
+            } catch (error) {
+                console.error("Gagal mengambil data member:", error);
+                memberSelect.innerHTML = '<option value="">Terjadi kesalahan jaringan.</option>';
+            } finally {
+                loadingText.classList.add('hidden');
+                memberSelect.disabled = false;
+            }
+        }
+
+        fetchMembersLive();
+
+        document.getElementById('jktForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const type = videoTypeSelect.value;
+            let targetUrl = '';
+
+            if (type === 'birthday') {
+                const id = memberSelect.value;
+                if (!id) return; 
+                targetUrl = `https://jkt48.com/fanclub-video/detail/id/${id}/type/birthday`;
+            } else if (type === 'lumina') {
+                let idVal = videoIdInput.value.trim();
+                const submitMatch = idVal.match(/\/id\/(\d+)/);
+                const id = submitMatch ? submitMatch[1] : idVal.replace(/\D/g, '');
+                if (!id) return;
+                targetUrl = `https://jkt48.com/fanclub-video/detail/id/${id}/type/special?lang=id`;
+            }
+
+            if (targetUrl !== '') {
+                window.open(targetUrl, '_blank');
+            }
+        });
+    </script>
+
+</body>
+</html>
