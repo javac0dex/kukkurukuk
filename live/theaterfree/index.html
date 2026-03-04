@@ -394,5 +394,90 @@ document.addEventListener("click", function(e) {
             </div>
         </div>
     </div>
+    <script>
+        // Block DevTools keyboard shortcuts
+    function blockDevToolsKeys(e) {
+      // F12
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Ctrl+Shift+I
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Ctrl+Shift+J
+      if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Ctrl+Shift+C
+      if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Ctrl+U
+      if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Cmd+Option+I (Mac)
+      if (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Cmd+Option+J (Mac)
+      if (e.metaKey && e.altKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Cmd+Option+C (Mac)
+      if (e.metaKey && e.altKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      // Cmd+U (Mac)
+      if (e.metaKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }
+
+    // Detect DevTools via window size
+    var devToolsOpen = false;
+    var threshold = 160;
+
+    function detectDevTools() {
+      var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+      
+      if (widthThreshold || heightThreshold) {
+        if (!devToolsOpen) {
+          devToolsOpen = true;
+          window.close();
+          accessDenied.classList.add('visible');
+          document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;"><h1>Access Denied</h1></div>';
+          window.location.href = 'about:blank';
+        }
+      } else {
+        devToolsOpen = false;
+      }
+    }
+
+    // Add event listeners for DevTools blocking
+    document.addEventListener('keydown', blockDevToolsKeys, true);
+    window.addEventListener('keydown', blockDevToolsKeys, true);
+    setInterval(detectDevTools, 500);
+    </script>
 </body>
 </html>
