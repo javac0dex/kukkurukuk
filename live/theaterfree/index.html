@@ -266,10 +266,6 @@
   color: #000;
 }
 
-.btn-close {
-  background: #444;
-  color: #fff;
-}
 
 @keyframes fadeIn {
   from {opacity:0; transform: scale(0.9);}
@@ -299,7 +295,6 @@ let cooldown = parseInt(localStorage.getItem("affCooldown")) || 0;
 
 const popup = document.getElementById("affiliate-popup");
 const visitBtn = document.querySelector(".btn-visit");
-const closeBtn = document.querySelector(".btn-close");
 
 function canShowPopup() {
   return Date.now() > cooldown;
