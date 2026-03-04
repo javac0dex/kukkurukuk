@@ -218,6 +218,117 @@
         }
     </style>
 </head>
+    <!-- Affiliate Popup -->
+<style>
+  #affiliate-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  #affiliate-popup .box {
+    background: #111;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 90%;
+    width: 320px;
+    animation: fadeIn 0.3s ease;
+  }
+  #affiliate-popup img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+  #affiliate-popup button {
+    padding: 12px 18px;
+    margin: 6px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  #affiliate-popup .btn-visit {
+    background: #ffa500;
+    color: #000;
+    font-weight: 600;
+  }
+  #affiliate-popup .btn-close {
+    background: #555;
+    color: #fff;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0; transform: scale(0.95);}
+    to {opacity:1; transform: scale(1);}
+  }
+</style>
+
+<div id="affiliate-popup">
+  <div class="box">
+    <img src="https://freeimage.host/i/qCYngTP" alt="Promo">
+    <button class="btn-visit">Lihat Promo</button>
+    <button class="btn-close">Tutup</button>
+  </div>
+</div>
+
+<script>
+  const links = [
+    "https://shopee.com1",
+    "https://shopee.com2",
+    "https://shopee.com3",
+    "https://shopee.com4"
+  ];
+
+  let clickCount = parseInt(localStorage.getItem("affClicks")) || 0;
+  let cooldown = parseInt(localStorage.getItem("affCooldown")) || 0;
+
+  const popup = document.getElementById("affiliate-popup");
+  const visitBtn = popup.querySelector(".btn-visit");
+  const closeBtn = popup.querySelector(".btn-close");
+
+  function showPopup() {
+    // Jika cooldown masih berlaku
+    const now = Date.now();
+    if (cooldown > now) return;
+
+    popup.style.display = "flex";
+  }
+
+  function hidePopup() {
+    popup.style.display = "none";
+  }
+
+  visitBtn.addEventListener("click", () => {
+    // buka link sesuai rotasi
+    const link = links[clickCount % links.length];
+    window.open(link, "_blank");
+
+    clickCount++;
+    localStorage.setItem("affClicks", clickCount);
+
+    hidePopup();
+
+    // jika sudah 4 klik, aktifkan cooldown 5 menit
+    if (clickCount >= 4) {
+      cooldown = Date.now() + 5 * 60 * 1000;
+      localStorage.setItem("affCooldown", cooldown);
+      localStorage.setItem("affClicks", 0);
+    }
+  });
+
+  closeBtn.addEventListener("click", hidePopup);
+
+  // buka popup hanya saat user klik di badan halaman
+  document.body.addEventListener("click", function handler(e) {
+    // hanya sekali setiap event user
+    showPopup();
+    // hapus listener agar tidak muncul setiap klik
+    document.body.removeEventListener("click", handler);
+  });
+</script>
 <body>
     <div class="container">
         <div class="header">
