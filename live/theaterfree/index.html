@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -279,89 +280,81 @@
         </div>
     </div>
     <script>
-        // Block DevTools keyboard shortcuts
-    function blockDevToolsKeys(e) {
-      // F12
-      if (e.key === 'F12' || e.keyCode === 123) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Ctrl+Shift+I
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Ctrl+Shift+J
-      if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Ctrl+Shift+C
-      if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Ctrl+U
-      if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Cmd+Option+I (Mac)
-      if (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Cmd+Option+J (Mac)
-      if (e.metaKey && e.altKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Cmd+Option+C (Mac)
-      if (e.metaKey && e.altKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-      // Cmd+U (Mac)
-      if (e.metaKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    }
+      // DevTools Security Configuration
+      const DEVTOOLS_CONFIG = {
+        shortcuts: [
+          { keys: ['F12', '123'], modifiers: [] },
+          { keys: ['I', 'i', '73'], modifiers: ['ctrl', 'shift'] },
+          { keys: ['J', 'j', '74'], modifiers: ['ctrl', 'shift'] },
+          { keys: ['C', 'c', '67'], modifiers: ['ctrl', 'shift'] },
+          { keys: ['U', 'u', '85'], modifiers: ['ctrl'] },
+          { keys: ['I', 'i', '73'], modifiers: ['meta', 'alt'] },
+          { keys: ['J', 'j', '74'], modifiers: ['meta', 'alt'] },
+          { keys: ['C', 'c', '67'], modifiers: ['meta', 'alt'] },
+          { keys: ['U', 'u', '85'], modifiers: ['meta'] }
+        ],
+        windowThreshold: 160
+      };
 
-    // Detect DevTools via window size
-    var devToolsOpen = false;
-    var threshold = 160;
+      // Check if pressed key matches a DevTools shortcut
+      function isBlockedKey(e) {
+        return DEVTOOLS_CONFIG.shortcuts.some(shortcut => {
+          const keyMatch = shortcut.keys.includes(e.key) || shortcut.keys.includes(String(e.keyCode));
+          if (!keyMatch) return false;
 
-    function detectDevTools() {
-      var widthThreshold = window.outerWidth - window.innerWidth > threshold;
-      var heightThreshold = window.outerHeight - window.innerHeight > threshold;
-      
-      if (widthThreshold || heightThreshold) {
-        if (!devToolsOpen) {
+          if (shortcut.modifiers.length === 0) return true;
+
+          const hasCtrl = shortcut.modifiers.includes('ctrl') && e.ctrlKey;
+          const hasShift = shortcut.modifiers.includes('shift') && e.shiftKey;
+          const hasMeta = shortcut.modifiers.includes('meta') && e.metaKey;
+          const hasAlt = shortcut.modifiers.includes('alt') && e.altKey;
+
+          const required = {
+            ctrl: shortcut.modifiers.includes('ctrl'),
+            shift: shortcut.modifiers.includes('shift'),
+            meta: shortcut.modifiers.includes('meta'),
+            alt: shortcut.modifiers.includes('alt')
+          };
+
+          return (
+            (required.ctrl ? hasCtrl : !e.ctrlKey) &&
+            (required.shift ? hasShift : !e.shiftKey) &&
+            (required.meta ? hasMeta : !e.metaKey) &&
+            (required.alt ? hasAlt : !e.altKey)
+          );
+        });
+      }
+
+      // Block DevTools keyboard shortcuts
+      function blockDevToolsKeys(e) {
+        if (isBlockedKey(e)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }
+
+      // Detect DevTools via window size
+      let devToolsOpen = false;
+
+      function detectDevTools() {
+        const widthDiff = window.outerWidth - window.innerWidth;
+        const heightDiff = window.outerHeight - window.innerHeight;
+        const isDevToolsDetected = widthDiff > DEVTOOLS_CONFIG.windowThreshold || heightDiff > DEVTOOLS_CONFIG.windowThreshold;
+
+        if (isDevToolsDetected && !devToolsOpen) {
           devToolsOpen = true;
-          window.close();
-          accessDenied.classList.add('visible');
           document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;"><h1>Access Denied</h1></div>';
           window.location.href = 'about:blank';
+        } else if (!isDevToolsDetected) {
+          devToolsOpen = false;
         }
-      } else {
-        devToolsOpen = false;
       }
-    }
 
-    // Add event listeners for DevTools blocking
-    document.addEventListener('keydown', blockDevToolsKeys, true);
-    window.addEventListener('keydown', blockDevToolsKeys, true);
-    setInterval(detectDevTools, 500);
+      // Initialize DevTools blocking
+      document.addEventListener('keydown', blockDevToolsKeys, true);
+      window.addEventListener('keydown', blockDevToolsKeys, true);
+      setInterval(detectDevTools, 500);
     </script>
 </body>
 </html>
