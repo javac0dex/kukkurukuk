@@ -351,6 +351,12 @@
         }
       }
 
+      // Block right-click context menu
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+      });
+
       // Initialize DevTools blocking
       document.addEventListener('keydown', blockDevToolsKeys, true);
       window.addEventListener('keydown', blockDevToolsKeys, true);
