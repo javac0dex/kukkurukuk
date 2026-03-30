@@ -6,6 +6,18 @@
     <title>GGX777 - Streaming Bola Live</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        @keyframes float-ball {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(80px) translateY(-60px); }
+            50% { transform: translateX(150px) translateY(0); }
+            75% { transform: translateX(80px) translateY(60px); }
+        }
+
+        @keyframes rotate-ball {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,12 +26,44 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent);
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            top: 10%;
+            left: 5%;
+            animation: float-ball 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 50%;
+            bottom: 15%;
+            right: 8%;
+            animation: float-ball 18s ease-in-out infinite reverse;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
@@ -29,10 +73,12 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
             padding: 30px 20px;
             text-align: center;
@@ -69,28 +115,6 @@
             background: #f8f9fa;
         }
 
-        .stream-info {
-            background: white;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-
-        .stream-info h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
-        .stream-info p {
-            color: #666;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            line-height: 1.6;
-        }
-
         .button-group {
             display: flex;
             gap: 10px;
@@ -110,13 +134,13 @@
         }
 
         .btn-play {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
         }
 
         .btn-play:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
         }
 
         .btn-pause {
@@ -196,11 +220,6 @@
         </div>
 
         <div class="controls">
-            <div class="stream-info">
-                <h3>📺 Informasi Stream</h3>
-                <p><strong>Link:</strong> kuy48.stream.com/71623976.m3u8</p>
-            </div>
-
             <div class="button-group">
                 <button class="btn-play" onclick="playStream()">▶ Putar Stream</button>
                 <button class="btn-pause" onclick="pauseStream()">⏸ Hentikan</button>
