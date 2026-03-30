@@ -119,6 +119,13 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .stream-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         button {
@@ -159,6 +166,29 @@
 
         .btn-fullscreen:hover {
             background: #218838;
+        }
+
+        .btn-refresh {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-refresh:hover {
+            background: #e68900;
+        }
+
+        .btn-stream {
+            background: #2196F3;
+            color: white;
+            flex: 0 1 auto;
+        }
+
+        .btn-stream:hover {
+            background: #0b7dda;
+        }
+
+        .btn-stream.active {
+            background: #ff6b6b;
         }
 
         .status {
@@ -223,7 +253,14 @@
             <div class="button-group">
                 <button class="btn-play" onclick="playStream()">▶ Putar Stream</button>
                 <button class="btn-pause" onclick="pauseStream()">⏸ Hentikan</button>
+                <button class="btn-refresh" onclick="refreshStream()">🔄 Refresh</button>
                 <button class="btn-fullscreen" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+            </div>
+
+            <div class="stream-group">
+                <button class="btn-stream active" id="stream1-btn" onclick="switchStream(1)">Stream 1</button>
+                <button class="btn-stream" id="stream2-btn" onclick="switchStream(2)">Stream 2</button>
+                <button class="btn-stream" id="stream3-btn" onclick="switchStream(3)">Stream 3</button>
             </div>
 
             <div class="status" id="status">
@@ -239,25 +276,46 @@
     <script>
         const video = document.getElementById('videoPlayer');
         const statusDiv = document.getElementById('status');
-        const streamUrl = 'https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8';
+        
+        const streams = {
+            1: 'https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8',
+            2: 'https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8',
+            3: 'https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8'
+        };
+
+        let currentStream = 1;
+        let currentHls = null;
 
         function updateStatus(message, type = '') {
             statusDiv.textContent = message;
             statusDiv.className = 'status ' + type;
         }
 
-        function playStream() {
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(video);
+        function updateStreamButtons() {
+            document.getElementById('stream1-btn').classList.remove('active');
+            document.getElementById('stream2-btn').classList.remove('active');
+            document.getElementById('stream3-btn').classList.remove('active');
+            document.getElementById('stream' + currentStream + '-btn').classList.add('active');
+        }
 
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    updateStatus('Status: Stream sedang diputar ✓', 'playing');
+        function playStream() {
+            const streamUrl = streams[currentStream];
+            updateStatus('Status: Memuat stream...', 'loading');
+
+            if (Hls.isSupported()) {
+                if (currentHls) {
+                    currentHls.destroy();
+                }
+                currentHls = new Hls();
+                currentHls.loadSource(streamUrl);
+                currentHls.attachMedia(video);
+
+                currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    updateStatus('Status: Stream ' + currentStream + ' sedang diputar ✓', 'playing');
                     video.play();
                 });
 
-                hls.on(Hls.Events.ERROR, function(event, data) {
+                currentHls.on(Hls.Events.ERROR, function(event, data) {
                     if (data.fatal) {
                         updateStatus('⚠ Error: Stream tidak dapat diakses. Periksa koneksi Anda.', 'error');
                     }
@@ -265,7 +323,7 @@
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 // Safari
                 video.src = streamUrl;
-                updateStatus('Status: Stream sedang diputar ✓', 'playing');
+                updateStatus('Status: Stream ' + currentStream + ' sedang diputar ✓', 'playing');
                 video.play();
             } else {
                 updateStatus('⚠ Error: Browser Anda tidak mendukung streaming HLS', 'error');
@@ -275,6 +333,29 @@
         function pauseStream() {
             video.pause();
             updateStatus('Status: Stream dijeda', '');
+        }
+
+        function refreshStream() {
+            updateStatus('Status: Refresh stream...', 'loading');
+            if (currentHls) {
+                currentHls.destroy();
+                currentHls = null;
+            }
+            video.src = '';
+            setTimeout(() => {
+                playStream();
+            }, 500);
+        }
+
+        function switchStream(streamNum) {
+            currentStream = streamNum;
+            updateStreamButtons();
+            updateStatus('Status: Mengganti ke Stream ' + streamNum + '...', 'loading');
+            if (video.paused) {
+                updateStatus('Status: Stream ' + streamNum + ' siap diputar', '');
+            } else {
+                playStream();
+            }
         }
 
         function toggleFullscreen() {
@@ -289,7 +370,8 @@
 
         // Auto-load stream on page load
         window.addEventListener('load', function() {
-            updateStatus('Status: Memuat stream...', 'loading');
+            updateStreamButtons();
+            updateStatus('Status: Siap untuk diputar', '');
         });
     </script>
 </body>
