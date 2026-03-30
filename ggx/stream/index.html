@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGX777 - Streaming Bola Live</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .player-wrapper {
+            background: #000;
+            position: relative;
+            padding-top: 56.25%;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stream-info {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .stream-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .stream-info p {
+            color: #666;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-play:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-pause {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-pause:hover {
+            background: #5a6268;
+        }
+
+        .btn-fullscreen {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-fullscreen:hover {
+            background: #218838;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .status.loading {
+            color: #ff9800;
+        }
+
+        .status.error {
+            color: #f44336;
+        }
+
+        .status.playing {
+            color: #4caf50;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+            border-top: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                padding: 20px;
+            }
+
+            button {
+                min-width: 100px;
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ GGX777</h1>
+            <p>Streaming Bola Live HD</p>
+        </header>
+
+        <div class="player-wrapper">
+            <video id="videoPlayer" controls></video>
+        </div>
+
+        <div class="controls">
+            <div class="stream-info">
+                <h3>📺 Informasi Stream</h3>
+                <p><strong>Link:</strong> kuy48.stream.com/71623976.m3u8</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-play" onclick="playStream()">▶ Putar Stream</button>
+                <button class="btn-pause" onclick="pauseStream()">⏸ Hentikan</button>
+                <button class="btn-fullscreen" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+            </div>
+
+            <div class="status" id="status">
+                Status: Siap untuk diputar
+            </div>
+        </div>
+
+        <footer>
+            <p>GGX777 © 2024 - Streaming Bola Online. Pastikan Anda memiliki izin untuk menonton konten ini.</p>
+        </footer>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const statusDiv = document.getElementById('status');
+        const streamUrl = 'http://kuy48.stream.com/71623976.m3u8';
+
+        function updateStatus(message, type = '') {
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+
+        function playStream() {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    updateStatus('Status: Stream sedang diputar ✓', 'playing');
+                    video.play();
+                });
+
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        updateStatus('⚠ Error: Stream tidak dapat diakses. Periksa koneksi Anda.', 'error');
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari
+                video.src = streamUrl;
+                updateStatus('Status: Stream sedang diputar ✓', 'playing');
+                video.play();
+            } else {
+                updateStatus('⚠ Error: Browser Anda tidak mendukung streaming HLS', 'error');
+            }
+        }
+
+        function pauseStream() {
+            video.pause();
+            updateStatus('Status: Stream dijeda', '');
+        }
+
+        function toggleFullscreen() {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+                video.msRequestFullscreen();
+            }
+        }
+
+        // Auto-load stream on page load
+        window.addEventListener('load', function() {
+            updateStatus('Status: Memuat stream...', 'loading');
+        });
+    </script>
+</body>
+</html>
