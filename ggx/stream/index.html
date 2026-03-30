@@ -306,22 +306,72 @@
                 if (currentHls) {
                     currentHls.destroy();
                 }
-                currentHls = new Hls();
-                currentHls.loadSource(streamUrl);
-                currentHls.attachMedia(video);
+                
+                const hlsConfig = {
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    CapLevelOnFPSDrop: true,
+                    capLevelToPlayerSize: true,
+                    maxMaxBufferLength: 30,
+                    maxBufferLength: 30,
+                    maxBufferSize: 60 * 1000 * 1000,
+                    maxLoadingDelay: 4,
+                    minAutoBitrate: 0,
+                    startLevel: undefined,
+                    defaultAudioCodec: 'mp4a.40.2'
+                };
 
-                currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
+                currentHls = new Hls(hlsConfig);
+                
+                currentHls.on(Hls.Events.MEDIA_ATTACHING, function() {
+                    console.log('[HLS] Media attaching...');
+                });
+
+                currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+                    console.log('[HLS] Manifest parsed, levels:', data.levels.length);
                     updateStatus('Status: Stream ' + currentStream + ' sedang diputar ✓', 'playing');
                     video.play();
                 });
 
+                currentHls.on(Hls.Events.LEVEL_SWITCHING, function(event, data) {
+                    console.log('[HLS] Switching to level:', data.level);
+                });
+
+                currentHls.on(Hls.Events.FRAG_LOADED, function(event, data) {
+                    console.log('[HLS] Fragment loaded:', data.frag.duration);
+                });
+
                 currentHls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('[HLS] Error occurred:', event, data);
                     if (data.fatal) {
-                        updateStatus('⚠ Error: Stream tidak dapat diakses. Periksa koneksi Anda.', 'error');
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                updateStatus('⚠ Error: Jaringan tidak stabil. Mencoba reconnect...', 'error');
+                                setTimeout(() => {
+                                    if (currentHls) {
+                                        currentHls.startLoad();
+                                    }
+                                }, 3000);
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                updateStatus('⚠ Error: Media error. Mencoba recovery...', 'error');
+                                if (currentHls) {
+                                    currentHls.recoverMediaError();
+                                }
+                                break;
+                            default:
+                                updateStatus('⚠ Error: Stream tidak dapat diakses. Periksa koneksi Anda.', 'error');
+                                break;
+                        }
                     }
                 });
+
+                currentHls.loadSource(streamUrl);
+                currentHls.attachMedia(video);
+                
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari
+                // Safari native HLS support
                 video.src = streamUrl;
                 updateStatus('Status: Stream ' + currentStream + ' sedang diputar ✓', 'playing');
                 video.play();
@@ -368,10 +418,47 @@
             }
         }
 
+        // Video event listeners
+        video.addEventListener('play', function() {
+            console.log('[Video] Playing');
+        });
+
+        video.addEventListener('pause', function() {
+            console.log('[Video] Paused');
+        });
+
+        video.addEventListener('ended', function() {
+            console.log('[Video] Ended');
+            updateStatus('Status: Stream telah berakhir', '');
+        });
+
+        video.addEventListener('error', function(e) {
+            console.error('[Video] Error:', e);
+            updateStatus('⚠ Error: Video playback error', 'error');
+        });
+
+        video.addEventListener('stalled', function() {
+            console.warn('[Video] Stalled - buffering...');
+            updateStatus('Status: Loading... (buffering)', 'loading');
+        });
+
+        video.addEventListener('playing', function() {
+            console.log('[Video] Playing event fired');
+            updateStatus('Status: Stream ' + currentStream + ' sedang diputar ✓', 'playing');
+        });
+
         // Auto-load stream on page load
         window.addEventListener('load', function() {
             updateStreamButtons();
             updateStatus('Status: Siap untuk diputar', '');
+            console.log('[App] Page loaded - HLS.js version:', Hls.version);
+        });
+
+        // Handle page unload
+        window.addEventListener('beforeunload', function() {
+            if (currentHls) {
+                currentHls.destroy();
+            }
         });
     </script>
 </body>
