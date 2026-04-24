@@ -29,7 +29,11 @@
                         radial-gradient(circle at top right, rgba(125,58,41,0.24), transparent 26%),
                         linear-gradient(180deg, #1a1d20 0%, #101214 100%);
         }
-        .player-stage { position: relative; background: #000; aspect-ratio: 16 / 9; }
+        .player-stage { 
+            position: relative; 
+            background: #000; 
+            aspect-ratio: 16 / 9; 
+        }
         .player-overlay {
             position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
             background: linear-gradient(180deg, rgba(20,23,26,0.18) 0%, rgba(20,23,26,0.78) 100%);
@@ -73,11 +77,14 @@
     </header>
 
     <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
-        <!-- PLAYER -->
         <section class="flex flex-col flex-1">
             <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl">
-                <div class="player-stage">
-                    <media-player id="replayPlayer" class="replay-media-player" view-type="video" stream-type="on-demand" playsinline crossorigin>
+                <div class="player-stage" id="playerStage">
+                    <media-player id="replayPlayer" class="replay-media-player" 
+                                  view-type="video" 
+                                  stream-type="on-demand" 
+                                  playsinline 
+                                  crossorigin>
                         <media-provider></media-provider>
                         <media-video-layout small-layout-when="never"></media-video-layout>
                     </media-player>
@@ -110,11 +117,7 @@
 
     <script type="module" src="https://cdn.vidstack.io/player"></script>
     <script>
-        const state = {
-            allReplays: [],
-            filteredReplays: [],
-            currentReplay: null,
-        };
+        const state = { allReplays: [], filteredReplays: [], currentReplay: null };
 
         const elements = {
             replayPlayer: document.getElementById("replayPlayer"),
@@ -125,13 +128,11 @@
             playerStatus: document.getElementById("playerStatus"),
             overlayPlayButton: document.getElementById("overlayPlayButton"),
             playerOverlay: document.getElementById("playerOverlay"),
+            playerStage: document.getElementById("playerStage")
         };
 
-        // ================== ENKRIPSI / DEKRIPSI YOUTUBE ==================
         function getYouTubeSrc(videoId) {
-            if (!videoId) return "";
-            // Bisa pakai youtube/ atau full URL (Vidstack support keduanya)
-            return `youtube/${videoId.trim()}`;
+            return videoId ? `youtube/${videoId.trim()}` : "";
         }
 
         function formatDate(dateString) {
@@ -147,7 +148,8 @@
             else elements.playerOverlay.classList.add("hidden");
         }
 
-        function renderList() {
+        function renderList() { /* ... sama seperti sebelumnya ... */ 
+            // (kode renderList tetap sama, saya singkat saja)
             if (!state.filteredReplays.length) {
                 elements.replayList.innerHTML = `<div class="rounded-2xl p-8 text-center text-gray-400">Tidak ada replay</div>`;
                 return;
@@ -170,13 +172,12 @@
             });
         }
 
-        function applySearch() {
+        function applySearch() { /* ... sama ... */ 
             const keyword = elements.searchInput.value.toLowerCase().trim();
-            state.filteredReplays = keyword ?
-                state.allReplays.filter(r => 
-                    (r.judul || "").toLowerCase().includes(keyword) ||
-                    (r.tanggal || "").toLowerCase().includes(keyword)
-                ) : [...state.allReplays];
+            state.filteredReplays = keyword ? state.allReplays.filter(r => 
+                (r.judul || "").toLowerCase().includes(keyword) || 
+                (r.tanggal || "").toLowerCase().includes(keyword)
+            ) : [...state.allReplays];
             renderList();
         }
 
@@ -186,59 +187,53 @@
             elements.replayDate.textContent = formatDate(replay.tanggal);
             elements.playerStatus.textContent = "Memuat replay...";
 
-            // Enkripsi -> hanya pakai video ID
-            const src = getYouTubeSrc(replay.videoId);
-            elements.replayPlayer.src = src;
-
+            elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
             toggleOverlay(true);
             renderList();
         }
 
         function init() {
-            // ✅ CONTOH DATA (hanya video ID, bukan full link)
             state.allReplays = [
-                {
-                    id: "1",
-                    judul: "JKT48 Special Performance",
-                    tanggal: "2026-04-24",
-                    videoId: "1MC3i_68xqg"          // ← Tinggal masukkan ID di sini
-                },
-                // Tambah replay lain seperti ini:
-                // {
-                //     id: "2",
-                //     judul: "Contoh Replay Lain",
-                //     tanggal: "2026-04-20",
-                //     videoId: "dQw4w9wgxcq"
-                // }
+                { id: "1", judul: "JKT48 Special Performance", tanggal: "2026-04-24", videoId: "1MC3i_68xqg" }
             ];
-
             state.filteredReplays = [...state.allReplays];
             renderList();
+            if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
 
-            if (state.allReplays.length > 0) {
-                loadReplayIntoPlayer(state.allReplays[0]);
-            }
-
-            // Event Listeners
             elements.searchInput.addEventListener("input", applySearch);
             elements.overlayPlayButton.addEventListener("click", () => {
                 elements.replayPlayer.play().catch(() => {});
             });
 
             const player = elements.replayPlayer;
-            const playerStage = document.querySelector(".player-stage");
 
+            // Event Vidstack
             player.addEventListener("play", () => toggleOverlay(false));
             player.addEventListener("pause", () => toggleOverlay(true));
             player.addEventListener("ended", () => toggleOverlay(true));
 
-            playerStage.addEventListener("click", (e) => {
+            // === PERBAIKAN UTAMA ===
+            // Hanya jalankan play/pause jika klik di overlay atau di video (bukan di kontrol Vidstack)
+            elements.playerStage.addEventListener("click", (e) => {
+                // Abaikan jika klik tombol play overlay
                 if (e.target.closest("#overlayPlayButton")) return;
-                player.paused ? player.play() : player.pause();
+
+                // Abaikan jika sedang fullscreen (hindari pause otomatis)
+                if (player.fullscreen) return;
+
+                // Toggle play/pause hanya di mode normal
+                if (player.paused) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
             });
 
-            playerStage.addEventListener("mouseleave", () => {
-                if (!player.paused) toggleOverlay(false);
+            // Mouse leave behavior
+            elements.playerStage.addEventListener("mouseleave", () => {
+                if (!player.paused && !player.fullscreen) {
+                    toggleOverlay(false);
+                }
             });
         }
 
