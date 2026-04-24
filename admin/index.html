@@ -11,11 +11,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
-
         body {
             font-family: "Atkinson Hyperlegible", sans-serif;
         }
-
         .replay-layout { min-height: 0; }
         .replay-sidebar {
             min-height: 0;
@@ -42,7 +40,6 @@
         .replay-list::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(180deg, rgba(252, 165, 165, 0.98) 0%, rgba(239, 68, 68, 0.98) 100%);
         }
-
         .player-shell {
             background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.2), transparent 32%),
                         radial-gradient(circle at top right, rgba(125, 58, 41, 0.24), transparent 26%),
@@ -67,6 +64,7 @@
             justify-content: center;
             background: linear-gradient(180deg, rgba(20, 23, 26, 0.18) 0%, rgba(20, 23, 26, 0.78) 100%);
             transition: opacity 0.25s ease, visibility 0.25s ease;
+            z-index: 20;
         }
         .player-overlay.hidden {
             opacity: 0;
@@ -88,7 +86,6 @@
             transform: scale(1.08);
             background: rgba(220, 38, 38, 0.98);
         }
-
         .replay-card {
             border: 1px solid rgba(255, 255, 255, 0.08);
             background: linear-gradient(180deg, rgba(72, 76, 78, 0.3) 0%, rgba(44, 46, 49, 0.9) 100%);
@@ -102,7 +99,6 @@
     </style>
 </head>
 <body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
-
     <!-- HEADER -->
     <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
         <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3 sm:px-6 md:px-8">
@@ -138,7 +134,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="mt-5 px-1">
                 <p id="playerStatus" class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">Replay Ready</p>
                 <h1 id="replayTitle" class="text-white text-2xl font-bold">Pilih replay</h1>
@@ -152,7 +147,7 @@
                 <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold">Daftar Replay</button>
             </div>
             <div id="searchBarWrap" class="p-4 border-b border-gray-700">
-                <input id="searchInput" type="text" placeholder="Cari judul replay..." 
+                <input id="searchInput" type="text" placeholder="Cari judul replay..."
                        class="w-full bg-[#1f2326] border border-gray-700 rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500">
             </div>
             <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto"></div>
@@ -196,12 +191,20 @@
         function formatDate(dateString) {
             if (!dateString) return "—";
             try {
-                return new Intl.DateTimeFormat("id-ID", { 
-                    day: "2-digit", 
-                    month: "long", 
-                    year: "numeric" 
+                return new Intl.DateTimeFormat("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric"
                 }).format(new Date(dateString));
             } catch { return dateString; }
+        }
+
+        function toggleOverlay(show) {
+            if (show) {
+                elements.playerOverlay.classList.remove("hidden");
+            } else {
+                elements.playerOverlay.classList.add("hidden");
+            }
         }
 
         function renderList() {
@@ -229,9 +232,9 @@
 
         function applySearch() {
             const keyword = elements.searchInput.value.toLowerCase().trim();
-            state.filteredReplays = keyword ? 
-                state.allReplays.filter(r => 
-                    (r.judul || "").toLowerCase().includes(keyword) || 
+            state.filteredReplays = keyword ?
+                state.allReplays.filter(r =>
+                    (r.judul || "").toLowerCase().includes(keyword) ||
                     (r.tanggal || "").toLowerCase().includes(keyword)
                 ) : [...state.allReplays];
             renderList();
@@ -245,11 +248,14 @@
 
             const src = normalizeReplayLink(replay.link);
             elements.replayPlayer.src = src;
+
+            // Reset overlay saat ganti video
+            toggleOverlay(true);
             renderList();
         }
 
         function init() {
-            // Contoh data replay (bisa diganti dengan data dari JSON atau API)
+            // Contoh data replay
             state.allReplays = [
                 {
                     id: "1",
@@ -258,7 +264,6 @@
                     link: "https://youtu.be/1MC3i_68xqg"
                 }
             ];
-
             state.filteredReplays = [...state.allReplays];
             renderList();
 
@@ -266,10 +271,35 @@
                 loadReplayIntoPlayer(state.allReplays[0]);
             }
 
-            // Event listeners
+            // Event Listeners
             elements.searchInput.addEventListener("input", applySearch);
             elements.overlayPlayButton.addEventListener("click", () => {
-                try { elements.replayPlayer.play(); } catch(e){}
+                elements.replayPlayer.play().catch(() => {});
+            });
+
+            const player = elements.replayPlayer;
+            const playerStage = document.querySelector(".player-stage");
+
+            // Vidstack Player Events
+            player.addEventListener("play", () => toggleOverlay(false));
+            player.addEventListener("pause", () => toggleOverlay(true));
+            player.addEventListener("ended", () => toggleOverlay(true));
+
+            // Klik area player untuk play/pause
+            playerStage.addEventListener("click", (e) => {
+                if (e.target.closest("#overlayPlayButton")) return;
+                if (player.paused) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
+            });
+
+            // Mouse leave → sembunyikan overlay jika sedang play
+            playerStage.addEventListener("mouseleave", () => {
+                if (!player.paused) {
+                    toggleOverlay(false);
+                }
             });
         }
 
