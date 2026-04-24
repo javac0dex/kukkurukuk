@@ -35,21 +35,19 @@
     </style>
 </head>
 <body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
-
     <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
         <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3">
             <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
         </div>
     </header>
-
     <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
         <section class="flex flex-col flex-1">
             <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl">
                 <div class="player-stage" id="playerStage">
-                    <media-player id="replayPlayer" class="replay-media-player" 
-                                  view-type="video" 
-                                  stream-type="on-demand" 
-                                  playsinline 
+                    <media-player id="replayPlayer" class="replay-media-player"
+                                  view-type="video"
+                                  stream-type="on-demand"
+                                  playsinline
                                   crossorigin>
                         <media-provider></media-provider>
                         <media-video-layout small-layout-when="never"></media-video-layout>
@@ -67,7 +65,6 @@
                 <p id="replayDate" class="text-gray-400 text-sm">Belum ada replay dipilih</p>
             </div>
         </section>
-
         <aside class="replay-sidebar w-full md:w-96 bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden">
             <div class="flex border-b border-gray-700">
                 <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold">Daftar Replay</button>
@@ -82,9 +79,14 @@
 
     <script type="module" src="https://cdn.vidstack.io/player"></script>
     <script>
-        const state = { allReplays: [], filteredReplays: [], currentReplay: null };
-        
-        let shouldAutoPlay = true;   // ← Kunci utama: mode Auto Play
+        const state = { 
+            allReplays: [], 
+            filteredReplays: [], 
+            currentReplay: null 
+        };
+       
+        let shouldAutoPlay = true;
+        let isUserPaused = false;     // ← Untuk membedakan pause manual & otomatis
 
         const elements = {
             replayPlayer: document.getElementById("replayPlayer"),
@@ -105,8 +107,11 @@
         function formatDate(dateString) {
             if (!dateString) return "—";
             try {
-                return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" })
-                    .format(new Date(dateString));
+                return new Intl.DateTimeFormat("id-ID", { 
+                    day: "2-digit", 
+                    month: "long", 
+                    year: "numeric" 
+                }).format(new Date(dateString));
             } catch { return dateString; }
         }
 
@@ -116,10 +121,10 @@
         }
 
         function forcePlay(player) {
-            if (shouldAutoPlay) {
+            if (shouldAutoPlay && !isUserPaused) {
                 setTimeout(() => {
                     player.play().catch(() => {});
-                }, 150);
+                }, 100);
             }
         }
 
@@ -128,8 +133,10 @@
             elements.replayTitle.textContent = replay.judul || "Tanpa Judul";
             elements.replayDate.textContent = formatDate(replay.tanggal);
             elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
-            toggleOverlay(true);
+            
+            isUserPaused = false;
             shouldAutoPlay = true;
+            toggleOverlay(true);
         }
 
         function init() {
@@ -137,52 +144,54 @@
                 { id: "1", judul: "JKT48 Special Performance", tanggal: "2026-04-24", videoId: "1MC3i_68xqg" }
             ];
             state.filteredReplays = [...state.allReplays];
-
+            
             if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
 
             const player = elements.replayPlayer;
 
-            // Event Utama
-            player.addEventListener("play", () => toggleOverlay(false));
+            // Event Listeners
+            player.addEventListener("play", () => {
+                toggleOverlay(false);
+                isUserPaused = false;
+            });
+
             player.addEventListener("pause", () => {
                 toggleOverlay(true);
-                forcePlay(player);           // ← Paksa play lagi jika seharusnya autoplay
-            });
-            player.addEventListener("ended", () => {
-                toggleOverlay(true);
-                shouldAutoPlay = false;
-            });
-
-            // Auto Play saat loading / buffering
-            player.addEventListener("waiting", () => {
-                forcePlay(player);
-            });
-
-            player.addEventListener("canplay", () => {
-                forcePlay(player);
-            });
-
-            player.addEventListener("seeked", () => {
-                forcePlay(player);
-            });
-
-            // Fullscreen
-            player.addEventListener("fullscreen-change", () => {
-                forcePlay(player);
-            });
-
-            // Click & Overlay
-            elements.playerStage.addEventListener("click", (e) => {
-                if (e.target.closest("#overlayPlayButton")) return;
-                if (player.paused) {
-                    player.play();
-                } else {
-                    player.pause();
-                    shouldAutoPlay = false;   // User pause manual
+                if (!isUserPaused) {
+                    forcePlay(player);   // Auto play jika pause bukan dari user
                 }
             });
 
+            player.addEventListener("ended", () => {
+                toggleOverlay(true);
+                shouldAutoPlay = false;
+                isUserPaused = false;
+            });
+
+            // Recovery dari buffering, seek, dll
+            player.addEventListener("waiting", () => forcePlay(player));
+            player.addEventListener("canplay", () => forcePlay(player));
+            player.addEventListener("seeked", () => forcePlay(player));
+            player.addEventListener("fullscreen-change", () => forcePlay(player));
+
+            // Click pada area player
+            elements.playerStage.addEventListener("click", (e) => {
+                if (e.target.closest("#overlayPlayButton")) return;
+
+                if (player.paused) {
+                    isUserPaused = false;
+                    shouldAutoPlay = true;
+                    player.play().catch(() => {});
+                } else {
+                    isUserPaused = true;
+                    shouldAutoPlay = false;
+                    player.pause();
+                }
+            });
+
+            // Overlay Play Button
             elements.overlayPlayButton.addEventListener("click", () => {
+                isUserPaused = false;
                 shouldAutoPlay = true;
                 player.play().catch(() => {});
             });
