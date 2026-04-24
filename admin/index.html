@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Replay Theater by Gemes.in</title>
-    <link rel="icon" type="image/x-icon" href="https://www.idn.app/img/logo-idn.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="https://www.idn.app/img/logo-idn.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
 
@@ -21,7 +22,6 @@
             user-select: text;
         }
 
-        /* CSS yang kamu kirimkan */
         .replay-layout { min-height: 0; }
         .replay-sidebar {
             min-height: 0;
@@ -59,10 +59,11 @@
             background: #000;
             aspect-ratio: 16 / 9;
         }
-        .yt-frame {
-            width: 100% !important;
-            height: 100% !important;
-            border: none;
+        .replay-media-player, .replay-media-player video, .replay-media-player iframe {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #000;
         }
         .player-overlay {
             position: absolute;
@@ -73,7 +74,11 @@
             background: linear-gradient(180deg, rgba(20, 23, 26, 0.18) 0%, rgba(20, 23, 26, 0.78) 100%);
             transition: opacity 0.25s ease, visibility 0.25s ease;
         }
-        .player-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .player-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
         .overlay-play {
             width: 78px;
             height: 78px;
@@ -107,6 +112,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 24px;
             background: rgba(10, 12, 14, 0.94);
             backdrop-filter: blur(10px);
             z-index: 99999;
@@ -114,12 +120,12 @@
         .page-guard.hidden { display: none; }
     </style>
 </head>
-<body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen">
+<body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
 
-    <!-- Header -->
-    <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="#" class="flex items-center">
+    <!-- HEADER -->
+    <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
+        <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3 sm:px-6 md:px-8">
+            <a href="#">
                 <img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9">
             </a>
             <div class="flex items-center gap-4">
@@ -135,109 +141,252 @@
         </div>
     </header>
 
-    <main class="replay-layout flex-1 flex flex-col md:flex-row max-w-7xl mx-auto w-full gap-4 p-4">
-        
-        <!-- Player Section -->
-        <section class="flex-1 flex flex-col">
-            <div class="player-shell rounded-3xl overflow-hidden border border-gray-800 shadow-2xl">
+    <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
+        <!-- PLAYER SECTION -->
+        <section class="flex flex-col flex-1">
+            <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl">
                 <div class="player-stage">
-                    <div id="youtubeContainer" class="w-full h-full"></div>
-                    
+                    <media-player id="replayPlayer" class="replay-media-player" view-type="video" stream-type="on-demand" playsinline crossorigin>
+                        <media-provider></media-provider>
+                        <media-video-layout small-layout-when="never"></media-video-layout>
+                    </media-player>
                     <div id="playerOverlay" class="player-overlay">
-                        <button onclick="playVideo()" class="overlay-play">
+                        <button id="overlayPlayButton" class="overlay-play">
                             <i class="fa-solid fa-play"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Stream Info -->
-            <div class="mt-6 bg-[#2c2e31] rounded-3xl p-6 flex flex-col md:flex-row gap-6">
-                <div class="flex items-center gap-5">
-                    <div class="relative w-32 h-32 flex-shrink-0">
-                        <img src="https://cdn.idn.media/idnaccount/avatar/500/82baca53b222467300863a9f63b08d1b.webp" 
-                             class="w-24 h-24 rounded-full object-cover ring-4 ring-[#7d3a29]">
-                        <img src="https://cdn.idn.media/content-images/benefit/image/avatar-frame-bos-besar.png" 
-                             class="absolute inset-0 w-full h-full object-contain">
-                    </div>
-                    <div>
-                        <span class="bg-[#7d3a29] text-white text-sm font-bold px-4 py-1 rounded-full inline-flex items-center gap-2">
-                            <i class="fa-solid fa-crown"></i> Official
-                        </span>
-                        <h3 class="text-3xl font-bold mt-3">Official JKT48</h3>
-                    </div>
-                </div>
-                <div class="flex-1 flex items-center justify-end gap-8">
-                    <div class="flex gap-8">
-                        <div>
-                            <p class="text-gray-400 text-xs">Following</p>
-                            <p class="text-3xl font-bold">7</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-xs">Followers</p>
-                            <p class="text-3xl font-bold">484.8K</p>
-                        </div>
-                    </div>
-                    <a href="https://gemes.in" target="_blank" 
-                       class="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-2xl font-bold transition">
-                        Follow
-                    </a>
-                </div>
+            <div class="mt-5 px-1">
+                <p id="playerStatus" class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">Replay Ready</p>
+                <h1 id="replayTitle" class="text-white text-2xl font-bold">Pilih replay</h1>
+                <p id="replayDate" class="text-gray-400 text-sm">Belum ada replay dipilih</p>
             </div>
         </section>
 
-        <!-- Sidebar -->
+        <!-- SIDEBAR -->
         <aside class="replay-sidebar w-full md:w-96 bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden">
-            <div class="border-b border-gray-700 p-4 text-center font-semibold text-lg">Daftar Replay</div>
-            <div class="p-4 border-b border-gray-700">
+            <div class="flex border-b border-gray-700">
+                <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold">Daftar Replay</button>
+            </div>
+            <div id="searchBarWrap" class="p-4 border-b border-gray-700">
                 <input id="searchInput" type="text" placeholder="Cari judul replay..." 
                        class="w-full bg-[#1f2326] border border-gray-700 rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500">
             </div>
-            <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto">
-                <!-- Dummy -->
-                <div class="replay-card rounded-2xl p-3 cursor-pointer" onclick="alert('Replay ini sedang diputar')">
-                    <div class="flex gap-3">
-                        <img src="https://i.ytimg.com/vi/1MC3i_68xqg/hqdefault.jpg" class="w-28 rounded-xl">
-                        <div class="flex-1">
-                            <p class="font-medium line-clamp-2">JKT48 - Special Stage Performance</p>
-                            <p class="text-xs text-gray-400 mt-2">24 April 2026 • 1.2M views</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto"></div>
         </aside>
     </main>
 
+    <!-- PAGE GUARD -->
+    <div id="pageGuard" class="page-guard hidden">
+        <div class="max-w-md w-full bg-gradient-to-b from-[#26292c] to-[#16181b] border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
+            <p class="page-guard-kicker text-red-400 text-xs font-bold tracking-widest">AKSES DIBATASI</p>
+            <h2 id="pageGuardTitle" class="text-2xl font-bold mt-3">Halaman diproteksi</h2>
+            <p id="pageGuardMessage" class="text-gray-400 mt-4">Interaksi ini tidak diizinkan pada halaman replay.</p>
+        </div>
+    </div>
+
+    <script type="module" src="https://cdn.vidstack.io/player"></script>
     <script>
-        const videoId = "1MC3i_68xqg";   // ← Ganti ID ini untuk video lain
+        // ==================== FULL JAVASCRIPT ====================
+        const state = {
+            allReplays: [],
+            filteredReplays: [],
+            currentReplay: null,
+            isSeeking: false,
+            guardLocked: false,
+            accessToken: "",
+            accessVerified: false,
+            accessPayload: null,
+            accessReplays: [],
+        };
 
-        function loadYouTube() {
-            const container = document.getElementById('youtubeContainer');
-            const iframe = document.createElement('iframe');
-            iframe.className = "yt-frame";
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&modestbranding=1&rel=0&showinfo=0&fs=1`;
-            iframe.allowFullscreen = true;
-            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            container.appendChild(iframe);
+        const elements = {
+            replayPlayer: document.getElementById("replayPlayer"),
+            replayList: document.getElementById("replayList"),
+            searchInput: document.getElementById("searchInput"),
+            searchBarWrap: document.getElementById("searchBarWrap"),
+            replayTitle: document.getElementById("replayTitle"),
+            replayDate: document.getElementById("replayDate"),
+            playerStatus: document.getElementById("playerStatus"),
+            overlayPlayButton: document.getElementById("overlayPlayButton"),
+            playerOverlay: document.getElementById("playerOverlay"),
+            pageGuard: document.getElementById("pageGuard"),
+            pageGuardTitle: document.getElementById("pageGuardTitle"),
+            pageGuardMessage: document.getElementById("pageGuardMessage"),
+        };
+
+        function slugify(value) {
+            return String(value || "replay")
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "") || "replay";
         }
 
-        function playVideo() {
-            const iframe = document.querySelector('#youtubeContainer iframe');
-            if (iframe) {
-                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`;
+        function buildReplayId(replay, index) {
+            if (replay.id) return slugify(replay.id);
+            return `${slugify(replay.judul)}-${slugify(replay.tanggal)}-${index + 1}`;
+        }
+
+        function normalizeReplayLink(rawUrl) {
+            if (!rawUrl) return rawUrl;
+            try {
+                const parsed = new URL(rawUrl);
+                const host = parsed.hostname.replace(/^www\./, "");
+                if (host === "youtu.be") {
+                    const videoId = parsed.pathname.replace("/", "").trim();
+                    return videoId ? `youtube/${videoId}` : rawUrl;
+                }
+                if (["youtube.com", "m.youtube.com"].includes(host)) {
+                    const watchId = parsed.searchParams.get("v");
+                    if (watchId) return `youtube/${watchId}`;
+                    // tambahan match lain jika perlu
+                }
+                return rawUrl;
+            } catch {
+                return rawUrl;
             }
-            document.getElementById('playerOverlay').classList.add('hidden');
         }
 
-        // Load player saat halaman dibuka
-        document.addEventListener('DOMContentLoaded', () => {
-            loadYouTube();
-            
-            // Search functionality (dummy)
-            document.getElementById('searchInput').addEventListener('keyup', (e) => {
-                if (e.key === "Enter") console.log("Mencari:", e.target.value);
+        function lockPage(title, message) {
+            if (state.guardLocked) return;
+            state.guardLocked = true;
+            elements.pageGuardTitle.textContent = title;
+            elements.pageGuardMessage.textContent = message;
+            elements.pageGuard.classList.remove("hidden");
+            elements.playerStatus.textContent = title;
+            try { elements.replayPlayer.pause(); } catch(e){}
+        }
+
+        function getVerifyEndpoint() {
+            const meta = document.querySelector('meta[name="replay-access-verify-url"]');
+            return meta?.content?.trim() || "";
+        }
+
+        function getAccessToken() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("token") || params.get("access_token") || "";
+        }
+
+        function decodeJwtPayload(token) {
+            try {
+                const parts = String(token || "").split(".");
+                if (parts.length !== 3) return null;
+                const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+                const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+                return JSON.parse(atob(base64 + padding));
+            } catch { return null; }
+        }
+
+        async function verifyReplayAccess() {
+            const token = getAccessToken();
+            if (!token) {
+                lockPage("Token dibutuhkan", "Link replay ini butuh token akses.");
+                return false;
+            }
+            // ... (sisanya bisa kamu tambahkan sesuai kebutuhan)
+            state.accessToken = token;
+            state.accessVerified = true;
+            return true;
+        }
+
+        function setupPageProtection() {
+            // Proteksi dasar (bisa diperluas)
+            document.addEventListener("contextmenu", e => e.preventDefault());
+            document.addEventListener("keydown", e => {
+                if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) {
+                    e.preventDefault();
+                    lockPage("Developer Tools Diblokir", "Akses ke source code tidak diizinkan.");
+                }
             });
-        });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return "—";
+            try {
+                return new Intl.DateTimeFormat("id-ID", { day:"2-digit", month:"long", year:"numeric" }).format(new Date(dateString));
+            } catch { return dateString; }
+        }
+
+        function renderList() {
+            if (!state.filteredReplays.length) {
+                elements.replayList.innerHTML = `<div class="empty-state rounded-2xl p-8 text-center text-gray-400">Tidak ada replay</div>`;
+                return;
+            }
+            elements.replayList.innerHTML = state.filteredReplays.map((replay, i) => `
+                <div class="replay-card rounded-2xl p-4 cursor-pointer ${state.currentReplay?.id === replay.id ? 'active' : ''}" data-index="${i}">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-red-400 font-bold">ARCHIVE</span>
+                        <span class="text-gray-500">${formatDate(replay.tanggal)}</span>
+                    </div>
+                    <h3 class="font-bold leading-tight">${replay.judul || "Tanpa Judul"}</h3>
+                </div>
+            `).join("");
+
+            elements.replayList.querySelectorAll(".replay-card").forEach(card => {
+                card.addEventListener("click", () => {
+                    if (state.guardLocked) return;
+                    const replay = state.filteredReplays[card.dataset.index];
+                    if (replay) loadReplayIntoPlayer(replay);
+                });
+            });
+        }
+
+        function applySearch() {
+            const keyword = elements.searchInput.value.toLowerCase().trim();
+            state.filteredReplays = keyword ? 
+                state.allReplays.filter(r => 
+                    r.judul?.toLowerCase().includes(keyword) || 
+                    r.tanggal?.toLowerCase().includes(keyword)
+                ) : [...state.allReplays];
+            renderList();
+        }
+
+        async function loadReplayIntoPlayer(replay) {
+            if (state.guardLocked) return;
+            state.currentReplay = replay;
+            elements.replayTitle.textContent = replay.judul || "Tanpa Judul";
+            elements.replayDate.textContent = formatDate(replay.tanggal);
+            elements.playerStatus.textContent = "Memuat...";
+
+            const src = normalizeReplayLink(replay.link);
+            elements.replayPlayer.src = src;
+            renderList();
+        }
+
+        function bindUiEvents() {
+            elements.searchInput.addEventListener("input", applySearch);
+            elements.overlayPlayButton.addEventListener("click", () => {
+                try { elements.replayPlayer.play(); } catch(e){}
+            });
+        }
+
+        async function init() {
+            setupPageProtection();
+            bindUiEvents();
+
+            const authorized = await verifyReplayAccess();
+            if (!authorized) return;
+
+            // Contoh data replay (ganti dengan data dari server kalau ada)
+            state.allReplays = [{
+                id: "1",
+                judul: "JKT48 Special Performance",
+                tanggal: "2026-04-24",
+                link: "https://youtu.be/1MC3i_68xqg"
+            }];
+
+            state.filteredReplays = [...state.allReplays];
+            renderList();
+
+            if (state.allReplays.length > 0) {
+                loadReplayIntoPlayer(state.allReplays[0]);
+            }
+        }
+
+        // Jalankan
+        document.addEventListener("DOMContentLoaded", init);
     </script>
 </body>
 </html>
