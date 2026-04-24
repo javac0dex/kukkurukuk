@@ -14,12 +14,6 @@
 
         body {
             font-family: "Atkinson Hyperlegible", sans-serif;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        input, textarea {
-            -webkit-user-select: text;
-            user-select: text;
         }
 
         .replay-layout { min-height: 0; }
@@ -105,19 +99,6 @@
             transform: translateY(-2px);
             background: linear-gradient(180deg, rgba(127, 29, 29, 0.35) 0%, rgba(44, 46, 49, 0.95) 100%);
         }
-
-        .page-guard {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background: rgba(10, 12, 14, 0.94);
-            backdrop-filter: blur(10px);
-            z-index: 99999;
-        }
-        .page-guard.hidden { display: none; }
     </style>
 </head>
 <body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
@@ -178,56 +159,24 @@
         </aside>
     </main>
 
-    <!-- PAGE GUARD -->
-    <div id="pageGuard" class="page-guard hidden">
-        <div class="max-w-md w-full bg-gradient-to-b from-[#26292c] to-[#16181b] border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
-            <p class="page-guard-kicker text-red-400 text-xs font-bold tracking-widest">AKSES DIBATASI</p>
-            <h2 id="pageGuardTitle" class="text-2xl font-bold mt-3">Halaman diproteksi</h2>
-            <p id="pageGuardMessage" class="text-gray-400 mt-4">Interaksi ini tidak diizinkan pada halaman replay.</p>
-        </div>
-    </div>
-
     <script type="module" src="https://cdn.vidstack.io/player"></script>
     <script>
-        // ==================== FULL JAVASCRIPT ====================
         const state = {
             allReplays: [],
             filteredReplays: [],
             currentReplay: null,
-            isSeeking: false,
-            guardLocked: false,
-            accessToken: "",
-            accessVerified: false,
-            accessPayload: null,
-            accessReplays: [],
         };
 
         const elements = {
             replayPlayer: document.getElementById("replayPlayer"),
             replayList: document.getElementById("replayList"),
             searchInput: document.getElementById("searchInput"),
-            searchBarWrap: document.getElementById("searchBarWrap"),
             replayTitle: document.getElementById("replayTitle"),
             replayDate: document.getElementById("replayDate"),
             playerStatus: document.getElementById("playerStatus"),
             overlayPlayButton: document.getElementById("overlayPlayButton"),
             playerOverlay: document.getElementById("playerOverlay"),
-            pageGuard: document.getElementById("pageGuard"),
-            pageGuardTitle: document.getElementById("pageGuardTitle"),
-            pageGuardMessage: document.getElementById("pageGuardMessage"),
         };
-
-        function slugify(value) {
-            return String(value || "replay")
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-+|-+$/g, "") || "replay";
-        }
-
-        function buildReplayId(replay, index) {
-            if (replay.id) return slugify(replay.id);
-            return `${slugify(replay.judul)}-${slugify(replay.tanggal)}-${index + 1}`;
-        }
 
         function normalizeReplayLink(rawUrl) {
             if (!rawUrl) return rawUrl;
@@ -238,80 +187,26 @@
                     const videoId = parsed.pathname.replace("/", "").trim();
                     return videoId ? `youtube/${videoId}` : rawUrl;
                 }
-                if (["youtube.com", "m.youtube.com"].includes(host)) {
-                    const watchId = parsed.searchParams.get("v");
-                    if (watchId) return `youtube/${watchId}`;
-                    // tambahan match lain jika perlu
-                }
                 return rawUrl;
             } catch {
                 return rawUrl;
             }
         }
 
-        function lockPage(title, message) {
-            if (state.guardLocked) return;
-            state.guardLocked = true;
-            elements.pageGuardTitle.textContent = title;
-            elements.pageGuardMessage.textContent = message;
-            elements.pageGuard.classList.remove("hidden");
-            elements.playerStatus.textContent = title;
-            try { elements.replayPlayer.pause(); } catch(e){}
-        }
-
-        function getVerifyEndpoint() {
-            const meta = document.querySelector('meta[name="replay-access-verify-url"]');
-            return meta?.content?.trim() || "";
-        }
-
-        function getAccessToken() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get("token") || params.get("access_token") || "";
-        }
-
-        function decodeJwtPayload(token) {
-            try {
-                const parts = String(token || "").split(".");
-                if (parts.length !== 3) return null;
-                const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-                const padding = "=".repeat((4 - (base64.length % 4)) % 4);
-                return JSON.parse(atob(base64 + padding));
-            } catch { return null; }
-        }
-
-        async function verifyReplayAccess() {
-            const token = getAccessToken();
-            if (!token) {
-                lockPage("Token dibutuhkan", "Link replay ini butuh token akses.");
-                return false;
-            }
-            // ... (sisanya bisa kamu tambahkan sesuai kebutuhan)
-            state.accessToken = token;
-            state.accessVerified = true;
-            return true;
-        }
-
-        function setupPageProtection() {
-            // Proteksi dasar (bisa diperluas)
-            document.addEventListener("contextmenu", e => e.preventDefault());
-            document.addEventListener("keydown", e => {
-                if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) {
-                    e.preventDefault();
-                    lockPage("Developer Tools Diblokir", "Akses ke source code tidak diizinkan.");
-                }
-            });
-        }
-
         function formatDate(dateString) {
             if (!dateString) return "—";
             try {
-                return new Intl.DateTimeFormat("id-ID", { day:"2-digit", month:"long", year:"numeric" }).format(new Date(dateString));
+                return new Intl.DateTimeFormat("id-ID", { 
+                    day: "2-digit", 
+                    month: "long", 
+                    year: "numeric" 
+                }).format(new Date(dateString));
             } catch { return dateString; }
         }
 
         function renderList() {
             if (!state.filteredReplays.length) {
-                elements.replayList.innerHTML = `<div class="empty-state rounded-2xl p-8 text-center text-gray-400">Tidak ada replay</div>`;
+                elements.replayList.innerHTML = `<div class="rounded-2xl p-8 text-center text-gray-400">Tidak ada replay</div>`;
                 return;
             }
             elements.replayList.innerHTML = state.filteredReplays.map((replay, i) => `
@@ -326,7 +221,6 @@
 
             elements.replayList.querySelectorAll(".replay-card").forEach(card => {
                 card.addEventListener("click", () => {
-                    if (state.guardLocked) return;
                     const replay = state.filteredReplays[card.dataset.index];
                     if (replay) loadReplayIntoPlayer(replay);
                 });
@@ -337,45 +231,33 @@
             const keyword = elements.searchInput.value.toLowerCase().trim();
             state.filteredReplays = keyword ? 
                 state.allReplays.filter(r => 
-                    r.judul?.toLowerCase().includes(keyword) || 
-                    r.tanggal?.toLowerCase().includes(keyword)
+                    (r.judul || "").toLowerCase().includes(keyword) || 
+                    (r.tanggal || "").toLowerCase().includes(keyword)
                 ) : [...state.allReplays];
             renderList();
         }
 
-        async function loadReplayIntoPlayer(replay) {
-            if (state.guardLocked) return;
+        function loadReplayIntoPlayer(replay) {
             state.currentReplay = replay;
             elements.replayTitle.textContent = replay.judul || "Tanpa Judul";
             elements.replayDate.textContent = formatDate(replay.tanggal);
-            elements.playerStatus.textContent = "Memuat...";
+            elements.playerStatus.textContent = "Memuat replay...";
 
             const src = normalizeReplayLink(replay.link);
             elements.replayPlayer.src = src;
             renderList();
         }
 
-        function bindUiEvents() {
-            elements.searchInput.addEventListener("input", applySearch);
-            elements.overlayPlayButton.addEventListener("click", () => {
-                try { elements.replayPlayer.play(); } catch(e){}
-            });
-        }
-
-        async function init() {
-            setupPageProtection();
-            bindUiEvents();
-
-            const authorized = await verifyReplayAccess();
-            if (!authorized) return;
-
-            // Contoh data replay (ganti dengan data dari server kalau ada)
-            state.allReplays = [{
-                id: "1",
-                judul: "JKT48 Special Performance",
-                tanggal: "2026-04-24",
-                link: "https://youtu.be/1MC3i_68xqg"
-            }];
+        function init() {
+            // Contoh data replay (bisa diganti dengan data dari JSON atau API)
+            state.allReplays = [
+                {
+                    id: "1",
+                    judul: "JKT48 Special Performance",
+                    tanggal: "2026-04-24",
+                    link: "https://youtu.be/1MC3i_68xqg"
+                }
+            ];
 
             state.filteredReplays = [...state.allReplays];
             renderList();
@@ -383,9 +265,14 @@
             if (state.allReplays.length > 0) {
                 loadReplayIntoPlayer(state.allReplays[0]);
             }
+
+            // Event listeners
+            elements.searchInput.addEventListener("input", applySearch);
+            elements.overlayPlayButton.addEventListener("click", () => {
+                try { elements.replayPlayer.play(); } catch(e){}
+            });
         }
 
-        // Jalankan
         document.addEventListener("DOMContentLoaded", init);
     </script>
 </body>
