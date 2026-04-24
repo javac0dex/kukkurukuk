@@ -11,90 +11,46 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
-        body {
-            font-family: "Atkinson Hyperlegible", sans-serif;
-        }
+        body { font-family: "Atkinson Hyperlegible", sans-serif; }
         .replay-layout { min-height: 0; }
-        .replay-sidebar {
-            min-height: 0;
-            max-height: min(70vh, 760px);
-            overflow: hidden;
-        }
+        .replay-sidebar { min-height: 0; max-height: min(70vh, 760px); overflow: hidden; }
         .replay-list {
-            min-height: 0;
-            overscroll-behavior: contain;
-            scrollbar-gutter: stable;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(239, 68, 68, 0.72) rgba(255, 255, 255, 0.06);
+            min-height: 0; overscroll-behavior: contain; scrollbar-gutter: stable;
+            scrollbar-width: thin; scrollbar-color: rgba(239, 68, 68, 0.72) rgba(255, 255, 255, 0.06);
         }
         .replay-list::-webkit-scrollbar { width: 10px; }
-        .replay-list::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 999px;
-        }
+        .replay-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 999px; }
         .replay-list::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(248, 113, 113, 0.95) 0%, rgba(220, 38, 38, 0.95) 100%);
-            border-radius: 999px;
-            border: 2px solid rgba(44, 46, 49, 0.95);
-        }
-        .replay-list::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(252, 165, 165, 0.98) 0%, rgba(239, 68, 68, 0.98) 100%);
+            background: linear-gradient(180deg, rgba(248,113,113,0.95) 0%, rgba(220,38,38,0.95) 100%);
+            border-radius: 999px; border: 2px solid rgba(44,46,49,0.95);
         }
         .player-shell {
-            background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.2), transparent 32%),
-                        radial-gradient(circle at top right, rgba(125, 58, 41, 0.24), transparent 26%),
+            background: radial-gradient(circle at top left, rgba(239,68,68,0.2), transparent 32%),
+                        radial-gradient(circle at top right, rgba(125,58,41,0.24), transparent 26%),
                         linear-gradient(180deg, #1a1d20 0%, #101214 100%);
         }
-        .player-stage {
-            position: relative;
-            background: #000;
-            aspect-ratio: 16 / 9;
-        }
-        .replay-media-player, .replay-media-player video, .replay-media-player iframe {
-            width: 100%;
-            height: 100%;
-            display: block;
-            background: #000;
-        }
+        .player-stage { position: relative; background: #000; aspect-ratio: 16 / 9; }
         .player-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(180deg, rgba(20, 23, 26, 0.18) 0%, rgba(20, 23, 26, 0.78) 100%);
-            transition: opacity 0.25s ease, visibility 0.25s ease;
-            z-index: 20;
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(180deg, rgba(20,23,26,0.18) 0%, rgba(20,23,26,0.78) 100%);
+            transition: opacity 0.25s ease, visibility 0.25s ease; z-index: 20;
         }
-        .player-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+        .player-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .overlay-play {
-            width: 78px;
-            height: 78px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            background: rgba(239, 68, 68, 0.92);
-            color: #fff;
-            font-size: 1.8rem;
-            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+            width: 78px; height: 78px; border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.25); background: rgba(239,68,68,0.92);
+            color: #fff; font-size: 1.8rem; box-shadow: 0 24px 50px rgba(0,0,0,0.35);
             transition: all 0.2s ease;
         }
-        .overlay-play:hover {
-            transform: scale(1.08);
-            background: rgba(220, 38, 38, 0.98);
-        }
+        .overlay-play:hover { transform: scale(1.08); background: rgba(220,38,38,0.98); }
         .replay-card {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: linear-gradient(180deg, rgba(72, 76, 78, 0.3) 0%, rgba(44, 46, 49, 0.9) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(72,76,78,0.3) 0%, rgba(44,46,49,0.9) 100%);
             transition: all 0.2s ease;
         }
         .replay-card:hover, .replay-card.active {
-            border-color: rgba(239, 68, 68, 0.7);
-            transform: translateY(-2px);
-            background: linear-gradient(180deg, rgba(127, 29, 29, 0.35) 0%, rgba(44, 46, 49, 0.95) 100%);
+            border-color: rgba(239,68,68,0.7); transform: translateY(-2px);
+            background: linear-gradient(180deg, rgba(127,29,29,0.35) 0%, rgba(44,46,49,0.95) 100%);
         }
     </style>
 </head>
@@ -102,9 +58,7 @@
     <!-- HEADER -->
     <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
         <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3 sm:px-6 md:px-8">
-            <a href="#">
-                <img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9">
-            </a>
+            <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
             <div class="flex items-center gap-4">
                 <div class="hidden sm:flex items-center gap-2 bg-[#14171a] rounded-lg px-3 py-1">
                     <img src="https://www.idn.app/_next/static/media/ic_gold.2cb768bf.svg" width="30" height="30">
@@ -119,7 +73,7 @@
     </header>
 
     <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
-        <!-- PLAYER SECTION -->
+        <!-- PLAYER -->
         <section class="flex flex-col flex-1">
             <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl">
                 <div class="player-stage">
@@ -173,38 +127,24 @@
             playerOverlay: document.getElementById("playerOverlay"),
         };
 
-        function normalizeReplayLink(rawUrl) {
-            if (!rawUrl) return rawUrl;
-            try {
-                const parsed = new URL(rawUrl);
-                const host = parsed.hostname.replace(/^www\./, "");
-                if (host === "youtu.be") {
-                    const videoId = parsed.pathname.replace("/", "").trim();
-                    return videoId ? `youtube/${videoId}` : rawUrl;
-                }
-                return rawUrl;
-            } catch {
-                return rawUrl;
-            }
+        // ================== ENKRIPSI / DEKRIPSI YOUTUBE ==================
+        function getYouTubeSrc(videoId) {
+            if (!videoId) return "";
+            // Bisa pakai youtube/ atau full URL (Vidstack support keduanya)
+            return `youtube/${videoId.trim()}`;
         }
 
         function formatDate(dateString) {
             if (!dateString) return "—";
             try {
-                return new Intl.DateTimeFormat("id-ID", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric"
-                }).format(new Date(dateString));
+                return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" })
+                    .format(new Date(dateString));
             } catch { return dateString; }
         }
 
         function toggleOverlay(show) {
-            if (show) {
-                elements.playerOverlay.classList.remove("hidden");
-            } else {
-                elements.playerOverlay.classList.add("hidden");
-            }
+            if (show) elements.playerOverlay.classList.remove("hidden");
+            else elements.playerOverlay.classList.add("hidden");
         }
 
         function renderList() {
@@ -233,7 +173,7 @@
         function applySearch() {
             const keyword = elements.searchInput.value.toLowerCase().trim();
             state.filteredReplays = keyword ?
-                state.allReplays.filter(r =>
+                state.allReplays.filter(r => 
                     (r.judul || "").toLowerCase().includes(keyword) ||
                     (r.tanggal || "").toLowerCase().includes(keyword)
                 ) : [...state.allReplays];
@@ -246,24 +186,32 @@
             elements.replayDate.textContent = formatDate(replay.tanggal);
             elements.playerStatus.textContent = "Memuat replay...";
 
-            const src = normalizeReplayLink(replay.link);
+            // Enkripsi -> hanya pakai video ID
+            const src = getYouTubeSrc(replay.videoId);
             elements.replayPlayer.src = src;
 
-            // Reset overlay saat ganti video
             toggleOverlay(true);
             renderList();
         }
 
         function init() {
-            // Contoh data replay
+            // ✅ CONTOH DATA (hanya video ID, bukan full link)
             state.allReplays = [
                 {
                     id: "1",
                     judul: "JKT48 Special Performance",
                     tanggal: "2026-04-24",
-                    link: "https://youtu.be/1MC3i_68xqg"
-                }
+                    videoId: "1MC3i_68xqg"          // ← Tinggal masukkan ID di sini
+                },
+                // Tambah replay lain seperti ini:
+                // {
+                //     id: "2",
+                //     judul: "Contoh Replay Lain",
+                //     tanggal: "2026-04-20",
+                //     videoId: "dQw4w9wgxcq"
+                // }
             ];
+
             state.filteredReplays = [...state.allReplays];
             renderList();
 
@@ -280,26 +228,17 @@
             const player = elements.replayPlayer;
             const playerStage = document.querySelector(".player-stage");
 
-            // Vidstack Player Events
             player.addEventListener("play", () => toggleOverlay(false));
             player.addEventListener("pause", () => toggleOverlay(true));
             player.addEventListener("ended", () => toggleOverlay(true));
 
-            // Klik area player untuk play/pause
             playerStage.addEventListener("click", (e) => {
                 if (e.target.closest("#overlayPlayButton")) return;
-                if (player.paused) {
-                    player.play();
-                } else {
-                    player.pause();
-                }
+                player.paused ? player.play() : player.pause();
             });
 
-            // Mouse leave → sembunyikan overlay jika sedang play
             playerStage.addEventListener("mouseleave", () => {
-                if (!player.paused) {
-                    toggleOverlay(false);
-                }
+                if (!player.paused) toggleOverlay(false);
             });
         }
 
