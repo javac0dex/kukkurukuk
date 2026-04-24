@@ -148,8 +148,7 @@
             else elements.playerOverlay.classList.add("hidden");
         }
 
-        function renderList() { /* ... sama seperti sebelumnya ... */ 
-            // (kode renderList tetap sama, saya singkat saja)
+        function renderList() {
             if (!state.filteredReplays.length) {
                 elements.replayList.innerHTML = `<div class="rounded-2xl p-8 text-center text-gray-400">Tidak ada replay</div>`;
                 return;
@@ -172,12 +171,12 @@
             });
         }
 
-        function applySearch() { /* ... sama ... */ 
+        function applySearch() {
             const keyword = elements.searchInput.value.toLowerCase().trim();
-            state.filteredReplays = keyword ? state.allReplays.filter(r => 
-                (r.judul || "").toLowerCase().includes(keyword) || 
-                (r.tanggal || "").toLowerCase().includes(keyword)
-            ) : [...state.allReplays];
+            state.filteredReplays = keyword ? 
+                state.allReplays.filter(r => (r.judul || "").toLowerCase().includes(keyword) || 
+                                             (r.tanggal || "").toLowerCase().includes(keyword)) 
+                : [...state.allReplays];
             renderList();
         }
 
@@ -207,21 +206,26 @@
 
             const player = elements.replayPlayer;
 
-            // Event Vidstack
+            // Vidstack Events
             player.addEventListener("play", () => toggleOverlay(false));
             player.addEventListener("pause", () => toggleOverlay(true));
             player.addEventListener("ended", () => toggleOverlay(true));
 
-            // === PERBAIKAN UTAMA ===
-            // Hanya jalankan play/pause jika klik di overlay atau di video (bukan di kontrol Vidstack)
+            // ================== PERBAIKAN FULLSCREEN CHROME ==================
+            let isFullscreen = false;
+
+            player.addEventListener("fullscreen-change", (e) => {
+                isFullscreen = e.detail.active || false;
+            });
+
+            // Click handler yang lebih aman
             elements.playerStage.addEventListener("click", (e) => {
-                // Abaikan jika klik tombol play overlay
                 if (e.target.closest("#overlayPlayButton")) return;
 
-                // Abaikan jika sedang fullscreen (hindari pause otomatis)
-                if (player.fullscreen) return;
+                // JANGAN ganggu kalau sedang fullscreen (Chrome sensitive)
+                if (isFullscreen) return;
 
-                // Toggle play/pause hanya di mode normal
+                // Toggle hanya jika klik di area kosong / video (bukan kontrol)
                 if (player.paused) {
                     player.play();
                 } else {
@@ -229,9 +233,9 @@
                 }
             });
 
-            // Mouse leave behavior
+            // Mouse leave hanya berlaku di mode normal
             elements.playerStage.addEventListener("mouseleave", () => {
-                if (!player.paused && !player.fullscreen) {
+                if (!player.paused && !isFullscreen) {
                     toggleOverlay(false);
                 }
             });
