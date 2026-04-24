@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Replay Theater by Gemes.in</title>
+    <title>Arena Replay</title>
     <link rel="icon" type="image/x-icon" href="https://www.idn.app/img/logo-idn.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
@@ -79,9 +79,9 @@
 
     <script type="module" src="https://cdn.vidstack.io/player"></script>
     
-    <!-- ================== ANTI DEVTOOLS SCRIPT ================== -->
+    
     <script>
-        // DevTools Security Configuration
+        
         const DEVTOOLS_CONFIG = {
             shortcuts: [
                 { keys: ['F12', '123'], modifiers: [] },
@@ -149,19 +149,18 @@
             }
         }
 
-        // Block right-click
+        
         document.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             return false;
         });
 
-        // Initialize blocking
+        
         document.addEventListener('keydown', blockDevToolsKeys, true);
         window.addEventListener('keydown', blockDevToolsKeys, true);
         setInterval(detectDevTools, 500);
     </script>
 
-    <!-- ================== MAIN PLAYER SCRIPT ================== -->
     <script>
         const state = { 
             allReplays: [], 
@@ -225,7 +224,7 @@
 
         function init() {
             state.allReplays = [
-                { id: "1", judul: "JKT48 Special Performance", tanggal: "2026-04-24", videoId: "1MC3i_68xqg" }
+                { id: "1", judul: "Cara Meminum Ramune", tanggal: "2026-04-19", videoId: "1MC3i_68xqg" }
             ];
             state.filteredReplays = [...state.allReplays];
             
