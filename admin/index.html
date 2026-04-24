@@ -131,6 +131,8 @@
             playerStage: document.getElementById("playerStage")
         };
 
+        let isFullscreen = false;
+
         function getYouTubeSrc(videoId) {
             return videoId ? `youtube/${videoId.trim()}` : "";
         }
@@ -211,21 +213,20 @@
             player.addEventListener("pause", () => toggleOverlay(true));
             player.addEventListener("ended", () => toggleOverlay(true));
 
-            // ================== PERBAIKAN FULLSCREEN CHROME ==================
-            let isFullscreen = false;
-
+            // Fullscreen detection
             player.addEventListener("fullscreen-change", (e) => {
                 isFullscreen = e.detail.active || false;
             });
 
-            // Click handler yang lebih aman
+            // ================== CLICK HANDLER YANG SUDAH DIBERSIHKAN ==================
             elements.playerStage.addEventListener("click", (e) => {
+                // Jangan lakukan apa-apa jika klik tombol overlay
                 if (e.target.closest("#overlayPlayButton")) return;
 
-                // JANGAN ganggu kalau sedang fullscreen (Chrome sensitive)
+                // **PENTING**: Skip semua custom toggle saat fullscreen
                 if (isFullscreen) return;
 
-                // Toggle hanya jika klik di area kosong / video (bukan kontrol)
+                // Toggle play/pause hanya di mode normal
                 if (player.paused) {
                     player.play();
                 } else {
@@ -233,7 +234,7 @@
                 }
             });
 
-            // Mouse leave hanya berlaku di mode normal
+            // Mouse leave hanya di mode normal
             elements.playerStage.addEventListener("mouseleave", () => {
                 if (!player.paused && !isFullscreen) {
                     toggleOverlay(false);
