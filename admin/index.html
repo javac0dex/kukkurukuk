@@ -14,7 +14,10 @@
         body { font-family: "Atkinson Hyperlegible", sans-serif; }
         .replay-layout { min-height: 0; }
         .replay-sidebar { min-height: 0; max-height: min(70vh, 760px); overflow: hidden; }
-        .replay-list { min-height: 0; overscroll-behavior: contain; scrollbar-gutter: stable; scrollbar-width: thin; }
+        .replay-list {
+            min-height: 0; overscroll-behavior: contain; scrollbar-gutter: stable;
+            scrollbar-width: thin; scrollbar-color: rgba(239, 68, 68, 0.72) rgba(255, 255, 255, 0.06);
+        }
         .player-stage { position: relative; background: #000; aspect-ratio: 16 / 9; }
         .player-overlay {
             position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -32,7 +35,7 @@
     </style>
 </head>
 <body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
-    <!-- HEADER (sama seperti sebelumnya) -->
+
     <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
         <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3">
             <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
@@ -65,13 +68,13 @@
             </div>
         </section>
 
-        <!-- SIDEBAR (sama) -->
         <aside class="replay-sidebar w-full md:w-96 bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden">
             <div class="flex border-b border-gray-700">
                 <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold">Daftar Replay</button>
             </div>
             <div id="searchBarWrap" class="p-4 border-b border-gray-700">
-                <input id="searchInput" type="text" placeholder="Cari judul replay..." class="w-full bg-[#1f2326] border border-gray-700 rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500">
+                <input id="searchInput" type="text" placeholder="Cari judul replay..."
+                       class="w-full bg-[#1f2326] border border-gray-700 rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500">
             </div>
             <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto"></div>
         </aside>
@@ -80,8 +83,8 @@
     <script type="module" src="https://cdn.vidstack.io/player"></script>
     <script>
         const state = { allReplays: [], filteredReplays: [], currentReplay: null };
-        let wasPlayingBeforeFullscreen = false;
-        let isFullscreen = false;
+        
+        let shouldAutoPlay = true;   // ← Kunci utama: mode Auto Play
 
         const elements = {
             replayPlayer: document.getElementById("replayPlayer"),
@@ -95,15 +98,29 @@
             playerStage: document.getElementById("playerStage")
         };
 
-        function getYouTubeSrc(videoId) { return videoId ? `youtube/${videoId.trim()}` : ""; }
-        function formatDate(d) { /* ... sama seperti sebelumnya ... */ 
-            if (!d) return "—";
-            try { return new Intl.DateTimeFormat("id-ID", {day:"2-digit", month:"long", year:"numeric"}).format(new Date(d)); } 
-            catch { return d; }
+        function getYouTubeSrc(videoId) {
+            return videoId ? `youtube/${videoId.trim()}` : "";
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return "—";
+            try {
+                return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" })
+                    .format(new Date(dateString));
+            } catch { return dateString; }
         }
 
         function toggleOverlay(show) {
-            show ? elements.playerOverlay.classList.remove("hidden") : elements.playerOverlay.classList.add("hidden");
+            if (show) elements.playerOverlay.classList.remove("hidden");
+            else elements.playerOverlay.classList.add("hidden");
+        }
+
+        function forcePlay(player) {
+            if (shouldAutoPlay) {
+                setTimeout(() => {
+                    player.play().catch(() => {});
+                }, 150);
+            }
         }
 
         function loadReplayIntoPlayer(replay) {
@@ -112,53 +129,63 @@
             elements.replayDate.textContent = formatDate(replay.tanggal);
             elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
             toggleOverlay(true);
+            shouldAutoPlay = true;
         }
 
         function init() {
-            state.allReplays = [{ id: "1", judul: "JKT48 Special Performance", tanggal: "2026-04-24", videoId: "1MC3i_68xqg" }];
+            state.allReplays = [
+                { id: "1", judul: "JKT48 Special Performance", tanggal: "2026-04-24", videoId: "1MC3i_68xqg" }
+            ];
             state.filteredReplays = [...state.allReplays];
-            // renderList() ... (bisa ditambah jika perlu)
 
             if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
 
             const player = elements.replayPlayer;
 
-            // Event dasar
+            // Event Utama
             player.addEventListener("play", () => toggleOverlay(false));
-            player.addEventListener("pause", () => toggleOverlay(true));
-            player.addEventListener("ended", () => toggleOverlay(true));
-
-            // Fullscreen tracking
-            player.addEventListener("fullscreen-change", (e) => {
-                isFullscreen = e.detail.active || false;
+            player.addEventListener("pause", () => {
+                toggleOverlay(true);
+                forcePlay(player);           // ← Paksa play lagi jika seharusnya autoplay
+            });
+            player.addEventListener("ended", () => {
+                toggleOverlay(true);
+                shouldAutoPlay = false;
             });
 
-            // **FIX UTAMA: Auto Resume setelah loading di fullscreen**
+            // Auto Play saat loading / buffering
             player.addEventListener("waiting", () => {
-                if (isFullscreen && wasPlayingBeforeFullscreen) {
-                    setTimeout(() => {
-                        player.play().catch(() => {});
-                    }, 800);
+                forcePlay(player);
+            });
+
+            player.addEventListener("canplay", () => {
+                forcePlay(player);
+            });
+
+            player.addEventListener("seeked", () => {
+                forcePlay(player);
+            });
+
+            // Fullscreen
+            player.addEventListener("fullscreen-change", () => {
+                forcePlay(player);
+            });
+
+            // Click & Overlay
+            elements.playerStage.addEventListener("click", (e) => {
+                if (e.target.closest("#overlayPlayButton")) return;
+                if (player.paused) {
+                    player.play();
+                } else {
+                    player.pause();
+                    shouldAutoPlay = false;   // User pause manual
                 }
             });
 
-            player.addEventListener("playing", () => {
-                wasPlayingBeforeFullscreen = true;
+            elements.overlayPlayButton.addEventListener("click", () => {
+                shouldAutoPlay = true;
+                player.play().catch(() => {});
             });
-
-            player.addEventListener("pause", () => {
-                if (!isFullscreen) wasPlayingBeforeFullscreen = false;
-            });
-
-            // Click handler (hanya di non-fullscreen)
-            elements.playerStage.addEventListener("click", (e) => {
-                if (e.target.closest("#overlayPlayButton")) return;
-                if (isFullscreen) return;
-
-                player.paused ? player.play() : player.pause();
-            });
-
-            elements.overlayPlayButton.addEventListener("click", () => player.play().catch(() => {}));
         }
 
         document.addEventListener("DOMContentLoaded", init);
