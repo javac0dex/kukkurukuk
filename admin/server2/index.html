@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Arena Replay</title>
+    <link rel="icon" type="image/x-icon" href="https://www.idn.app/img/logo-idn.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+        body { font-family: "Atkinson Hyperlegible", sans-serif; }
+        .replay-layout { min-height: 0; }
+        .replay-sidebar { min-height: 0; max-height: min(70vh, 760px); overflow: hidden; }
+        .replay-list {
+            min-height: 0; overscroll-behavior: contain; scrollbar-gutter: stable;
+            scrollbar-width: thin; scrollbar-color: rgba(239, 68, 68, 0.72) rgba(255, 255, 255, 0.06);
+        }
+        .player-stage { position: relative; background: #000; aspect-ratio: 16 / 9; }
+        .player-overlay {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(180deg, rgba(20,23,26,0.18) 0%, rgba(20,23,26,0.78) 100%);
+            transition: opacity 0.25s ease, visibility 0.25s ease; z-index: 20;
+        }
+        .player-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .overlay-play {
+            width: 78px; height: 78px; border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.25); background: rgba(239,68,68,0.92);
+            color: #fff; font-size: 1.8rem; box-shadow: 0 24px 50px rgba(0,0,0,0.35);
+            transition: all 0.2s ease;
+        }
+        .overlay-play:hover { transform: scale(1.08); background: rgba(220,38,38,0.98); }
+    </style>
+</head>
+<body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
+    <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
+        <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3">
+            <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
+        </div>
+    </header>
+    <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
+        <section class="flex flex-col flex-1">
+            <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl">
+                <div class="player-stage" id="playerStage">
+                    <media-player id="replayPlayer" class="replay-media-player"
+                                  view-type="video"
+                                  stream-type="on-demand"
+                                  playsinline
+                                  crossorigin>
+                        <media-provider></media-provider>
+                        <media-video-layout small-layout-when="never"></media-video-layout>
+                    </media-player>
+                    <div id="playerOverlay" class="player-overlay">
+                        <button id="overlayPlayButton" class="overlay-play">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 px-1">
+                <p id="playerStatus" class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">Replay Ready</p>
+                <h1 id="replayTitle" class="text-white text-2xl font-bold">Pilih replay</h1>
+                <p id="replayDate" class="text-gray-400 text-sm">Belum ada replay dipilih</p>
+            </div>
+        </section>
+        <aside class="replay-sidebar w-full md:w-96 bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden">
+            <div class="flex border-b border-gray-700">
+                <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold">Daftar Replay</button>
+            </div>
+            <div id="searchBarWrap" class="p-4 border-b border-gray-700">
+                <input id="searchInput" type="text" placeholder="Cari judul replay..."
+                       class="w-full bg-[#1f2326] border border-gray-700 rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500">
+            </div>
+            <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto"></div>
+        </aside>
+    </main>
+
+    <script type="module" src="https://cdn.vidstack.io/player"></script>
+
+    <!-- Script Iklan -->
+    <script>
+        var links = [
+            "https://s.shopee.co.id/20rVZGM43C",
+            "https://s.shopee.co.id/4Aw7rZTpvo",
+            "https://s.shopee.co.id/3qJ9jIFPPf",
+            "https://s.shopee.co.id/4fsGj5Ymeb",
+            "https://s.shopee.co.id/9fH1WaO9Kq"
+        ];
+        var delay = 60000; // 60 detik
+        document.addEventListener("click", function() {
+            var lastOpen = localStorage.getItem("lastAdOpen");
+            var now = Date.now();
+            if (!lastOpen || now - lastOpen > delay) {
+                var randomLink = links[Math.floor(Math.random() * links.length)];
+                window.open(randomLink, "_blank");
+                localStorage.setItem("lastAdOpen", now);
+            }
+        });
+    </script>
+
+    <!-- Script Anti DevTools (Sudah Diperbaiki untuk Mobile Fullscreen) -->
+    <script>
+        const DEVTOOLS_CONFIG = {
+            desktopThreshold: 160,
+            mobileThreshold: 80,
+            checkInterval: 500
+        };
+
+        let devToolsOpen = false;
+
+        function isFullscreen() {
+            return !!(
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.msFullscreenElement ||
+                (window.innerHeight === screen.height && window.innerWidth === screen.width)
+            );
+        }
+
+        function isMobile() {
+            return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   window.innerWidth <= 768;
+        }
+
+        function detectDevTools() {
+            // SKIP deteksi saat fullscreen di mobile
+            if (isFullscreen() && isMobile()) {
+                return;
+            }
+
+            const widthDiff = window.outerWidth - window.innerWidth;
+            const heightDiff = window.outerHeight - window.innerHeight;
+
+            const threshold = isMobile() ? DEVTOOLS_CONFIG.mobileThreshold : DEVTOOLS_CONFIG.desktopThreshold;
+
+            const isDevToolsDetected = 
+                widthDiff > threshold || 
+                heightDiff > threshold ||
+                (widthDiff > 50 && heightDiff > 50);
+
+            if (isDevToolsDetected && !devToolsOpen) {
+                devToolsOpen = true;
+                document.body.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
+                        <div>
+                            <h1 style="font-size:2rem;margin-bottom:1rem;">🚫 Access Denied</h1>
+                            <p>Developer tools terdeteksi.</p>
+                        </div>
+                    </div>`;
+                setTimeout(() => window.location.href = 'about:blank', 800);
+            } else if (!isDevToolsDetected) {
+                devToolsOpen = false;
+            }
+        }
+
+        function isBlockedKey(e) {
+            const shortcuts = [
+                { key: 'F12', code: 123 },
+                { key: 'I', modifiers: ['ctrl', 'shift'] },
+                { key: 'J', modifiers: ['ctrl', 'shift'] },
+                { key: 'C', modifiers: ['ctrl', 'shift'] },
+                { key: 'U', modifiers: ['ctrl'] },
+                { key: 'I', modifiers: ['meta', 'alt'] },
+                { key: 'J', modifiers: ['meta', 'alt'] },
+                { key: 'C', modifiers: ['meta', 'alt'] },
+                { key: 'U', modifiers: ['meta'] }
+            ];
+
+            return shortcuts.some(s => {
+                if (e.key === s.key || e.keyCode === s.code) {
+                    if (!s.modifiers) return true;
+                    return s.modifiers.every(mod => {
+                        if (mod === 'ctrl') return e.ctrlKey;
+                        if (mod === 'shift') return e.shiftKey;
+                        if (mod === 'meta') return e.metaKey;
+                        if (mod === 'alt') return e.altKey;
+                        return false;
+                    });
+                }
+                return false;
+            });
+        }
+
+        function blockDevToolsKeys(e) {
+            if (isBlockedKey(e)) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', blockDevToolsKeys, true);
+        window.addEventListener('keydown', blockDevToolsKeys, true);
+
+        // Deteksi DevTools
+        setInterval(detectDevTools, DEVTOOLS_CONFIG.checkInterval);
+
+        // Reset flag saat fullscreen berubah
+        ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'].forEach(ev => {
+            document.addEventListener(ev, () => {
+                if (isFullscreen()) devToolsOpen = false;
+            });
+        });
+    </script>
+
+    <!-- Script Utama Replay -->
+    <script>
+        const state = {
+            allReplays: [],
+            filteredReplays: [],
+            currentReplay: null
+        };
+      
+        let shouldAutoPlay = true;
+        let isUserPaused = false;
+
+        const elements = {
+            replayPlayer: document.getElementById("replayPlayer"),
+            replayList: document.getElementById("replayList"),
+            searchInput: document.getElementById("searchInput"),
+            replayTitle: document.getElementById("replayTitle"),
+            replayDate: document.getElementById("replayDate"),
+            playerStatus: document.getElementById("playerStatus"),
+            overlayPlayButton: document.getElementById("overlayPlayButton"),
+            playerOverlay: document.getElementById("playerOverlay"),
+            playerStage: document.getElementById("playerStage")
+        };
+
+        function getYouTubeSrc(videoId) {
+            return videoId ? `youtube/${videoId.trim()}` : "";
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return "—";
+            try {
+                return new Intl.DateTimeFormat("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric"
+                }).format(new Date(dateString));
+            } catch { return dateString; }
+        }
+
+        function toggleOverlay(show) {
+            if (show) elements.playerOverlay.classList.remove("hidden");
+            else elements.playerOverlay.classList.add("hidden");
+        }
+
+        function forcePlay(player) {
+            if (shouldAutoPlay && !isUserPaused) {
+                setTimeout(() => player.play().catch(() => {}), 100);
+            }
+        }
+
+        function loadReplayIntoPlayer(replay) {
+            state.currentReplay = replay;
+            elements.replayTitle.textContent = replay.judul || "Tanpa Judul";
+            elements.replayDate.textContent = formatDate(replay.tanggal);
+            elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
+           
+            isUserPaused = false;
+            shouldAutoPlay = true;
+            toggleOverlay(true);
+        }
+
+        function init() {
+            state.allReplays = [
+                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "Ugr4X9Zzq4A" }
+            ];
+            state.filteredReplays = [...state.allReplays];
+           
+            if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
+
+            const player = elements.replayPlayer;
+
+            player.addEventListener("play", () => {
+                toggleOverlay(false);
+                isUserPaused = false;
+            });
+            player.addEventListener("pause", () => {
+                toggleOverlay(true);
+                if (!isUserPaused) forcePlay(player);
+            });
+            player.addEventListener("ended", () => {
+                toggleOverlay(true);
+                shouldAutoPlay = false;
+                isUserPaused = false;
+            });
+            player.addEventListener("waiting", () => forcePlay(player));
+            player.addEventListener("canplay", () => forcePlay(player));
+            player.addEventListener("seeked", () => forcePlay(player));
+            player.addEventListener("fullscreenchange", () => forcePlay(player));
+
+            elements.playerStage.addEventListener("click", (e) => {
+                if (e.target.closest("#overlayPlayButton")) return;
+                if (player.paused) {
+                    isUserPaused = false;
+                    shouldAutoPlay = true;
+                    player.play().catch(() => {});
+                } else {
+                    isUserPaused = true;
+                    shouldAutoPlay = false;
+                    player.pause();
+                }
+            });
+
+            elements.overlayPlayButton.addEventListener("click", () => {
+                isUserPaused = false;
+                shouldAutoPlay = true;
+                player.play().catch(() => {});
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>
