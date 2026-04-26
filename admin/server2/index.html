@@ -206,7 +206,9 @@
 
         function init() {
             state.allReplays = [
-                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "4ZcC3Isf06w" }
+                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "4ZcC3Isf06w" },
+                { id: "2", judul: "Arena Replay 2", tanggal: "2026-03-30", videoId: "RQi4VWakVQA" },
+                { id: "3", judul: "Arena Replay 3", tanggal: "2026-03-31", videoId: "njSI04qHZ70" }
             ];
             state.filteredReplays = [...state.allReplays];
             if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
