@@ -100,58 +100,57 @@
         });
     </script>
 
-    <!-- Anti DevTools (Diperbaiki khusus Mobile) -->
+    <!-- Anti DevTools (Khusus Desktop Saja) -->
     <script>
-        let devToolsOpen = false;
-
         function isMobile() {
             return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                    window.innerWidth <= 768;
         }
 
-        // Hanya deteksi di Desktop (lebih aman)
-        function detectDevTools() {
-            if (isMobile()) return; // Nonaktif total di mobile
-
-            const widthDiff = window.outerWidth - window.innerWidth;
-            const heightDiff = window.outerHeight - window.innerHeight;
-
-            if ((widthDiff > 160 || heightDiff > 160) && !devToolsOpen) {
-                devToolsOpen = true;
-                document.body.innerHTML = `
-                    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
-                        <div>
-                            <h1 style="font-size:2rem;margin-bottom:1rem;">🚫 Access Denied</h1>
-                            <p>Developer tools terdeteksi.</p>
-                        </div>
-                    </div>`;
-                setTimeout(() => window.location.href = 'about:blank', 800);
-            }
-        }
-
-        // Block shortcut keys (F12, Ctrl+Shift+I, dll)
-        function blockDevToolsKeys(e) {
-            const blocked = [
-                e.key === 'F12' || e.keyCode === 123,
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
-                (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
-                (e.ctrlKey && e.key === 'U') || (e.metaKey && e.key === 'U')
-            ];
-
-            if (blocked.some(Boolean)) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                return false;
-            }
-        }
-
-        // Event listeners
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', blockDevToolsKeys, true);
-        window.addEventListener('keydown', blockDevToolsKeys, true);
-
-        // Jalankan deteksi hanya di desktop
+        // HANYA JALANKAN ANTI DEVTOOLS DI DESKTOP
         if (!isMobile()) {
+            let devToolsOpen = false;
+
+            // Deteksi ukuran window
+            function detectDevTools() {
+                const widthDiff = window.outerWidth - window.innerWidth;
+                const heightDiff = window.outerHeight - window.innerHeight;
+
+                if ((widthDiff > 160 || heightDiff > 160) && !devToolsOpen) {
+                    devToolsOpen = true;
+                    document.body.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
+                            <div>
+                                <h1 style="font-size:2rem;margin-bottom:1rem;">🚫 Access Denied</h1>
+                                <p>Developer tools terdeteksi.</p>
+                            </div>
+                        </div>`;
+                    setTimeout(() => window.location.href = 'about:blank', 800);
+                }
+            }
+
+            // Block shortcut keys (F12, Ctrl+Shift+I, dll)
+            function blockDevToolsKeys(e) {
+                const blocked = [
+                    e.key === 'F12' || e.keyCode === 123,
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                    (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                    (e.ctrlKey && e.key === 'U') || (e.metaKey && e.key === 'U')
+                ];
+
+                if (blocked.some(Boolean)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }
+
+            // Event listeners - HANYA DI DESKTOP
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', blockDevToolsKeys, true);
+            window.addEventListener('keydown', blockDevToolsKeys, true);
+
+            // Jalankan deteksi setiap 500ms
             setInterval(detectDevTools, 500);
         }
     </script>
