@@ -202,6 +202,23 @@
             isUserPaused = false;
             shouldAutoPlay = true;
             toggleOverlay(true);
+            renderReplayList(state.filteredReplays);
+        }
+
+        function renderReplayList(replays) {
+            elements.replayList.innerHTML = "";
+            replays.forEach(replay => {
+                const item = document.createElement("div");
+                item.className = `bg-[#1f2326] border border-gray-700 rounded-xl p-3 cursor-pointer transition-all hover:border-red-500 hover:shadow-lg ${
+                    state.currentReplay?.id === replay.id ? "border-red-500 bg-[#2a2d31]" : ""
+                }`;
+                item.innerHTML = `
+                    <p class="text-white font-semibold text-sm">${replay.judul || "Tanpa Judul"}</p>
+                    <p class="text-gray-400 text-xs mt-1">${formatDate(replay.tanggal)}</p>
+                `;
+                item.addEventListener("click", () => loadReplayIntoPlayer(replay));
+                elements.replayList.appendChild(item);
+            });
         }
 
         function init() {
@@ -211,6 +228,7 @@
                 { id: "3", judul: "Arena Replay 3", tanggal: "2026-03-31", videoId: "njSI04qHZ70" }
             ];
             state.filteredReplays = [...state.allReplays];
+            renderReplayList(state.filteredReplays);
             if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
 
             const player = elements.replayPlayer;
@@ -233,6 +251,15 @@
 
             elements.overlayPlayButton.addEventListener("click", () => {
                 isUserPaused = false; shouldAutoPlay = true; player.play().catch(() => {});
+            });
+
+            elements.searchInput.addEventListener("input", (e) => {
+                const query = e.target.value.toLowerCase();
+                state.filteredReplays = state.allReplays.filter(replay => 
+                    replay.judul.toLowerCase().includes(query) || 
+                    replay.tanggal.includes(query)
+                );
+                renderReplayList(state.filteredReplays);
             });
         }
 
