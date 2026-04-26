@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Arena Replay</title>
+    <link rel="icon" type="image/x-icon" href="https://www.idn.app/img/logo-idn.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+        body { font-family: "Atkinson Hyperlegible", sans-serif; }
+        .player-stage { position: relative; background: #000; aspect-ratio: 16 / 9; }
+        .player-overlay {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(180deg, rgba(20,23,26,0.18) 0%, rgba(20,23,26,0.78) 100%);
+            transition: opacity 0.25s ease, visibility 0.25s ease; z-index: 20;
+        }
+        .player-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .overlay-play {
+            width: 78px; height: 78px; border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.25); background: rgba(239,68,68,0.92);
+            color: #fff; font-size: 1.8rem; box-shadow: 0 24px 50px rgba(0,0,0,0.35);
+            transition: all 0.2s ease;
+        }
+        .overlay-play:hover { transform: scale(1.08); background: rgba(220,38,38,0.98); }
+        
+        /* Area Iklan */
+        .iklan-box {
+            background: #2c2e31;
+            border: 2px dashed #f97316;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: center;
+            color: #fbbf24;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen">
+
+    <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
+        <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3">
+            <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto w-full p-4">
+        <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl">
+            <div class="player-stage" id="playerStage">
+                <media-player id="replayPlayer" class="replay-media-player"
+                              view-type="video"
+                              stream-type="on-demand"
+                              playsinline
+                              crossorigin>
+                    <media-provider></media-provider>
+                    <media-video-layout small-layout-when="never"></media-video-layout>
+                </media-player>
+                
+                <div id="playerOverlay" class="player-overlay">
+                    <button id="overlayPlayButton" class="overlay-play">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 px-1">
+            <p id="playerStatus" class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">REPLAY READY</p>
+            <h1 id="replayTitle" class="text-white text-3xl font-bold">Judul Replay Kamu di Sini</h1>
+            <p id="replayDate" class="text-gray-400 text-sm">29 Maret 2026</p>
+        </div>
+
+        <!-- ==================== AREA IKLAN ==================== -->
+        <div class="iklan-box">
+            <p class="text-orange-400 text-lg">❤️ KATA-KATA IKLAN BISA DISINI ❤️</p>
+            <p class="mt-2 text-sm text-gray-300">
+                Masukkan teks promosi, link Shopee, affiliate, atau apapun di sini.<br>
+                Contoh: "Beli skin MLBB murah cuma di link bawah ini!"
+            </p>
+            <!-- Kamu bisa tambah link di sini -->
+            <!-- <a href="https://s.shopee.co.id/..." class="text-blue-400 underline">Klik Link Shopee</a> -->
+        </div>
+        <!-- ==================================================== -->
+    </main>
+
+    <script type="module" src="https://cdn.vidstack.io/player"></script>
+
+    <!-- Script Iklan (tetap aktif) -->
+    <script>
+        var links = [
+            "https://s.shopee.co.id/20rVZGM43C",
+            "https://s.shopee.co.id/4Aw7rZTpvo",
+            "https://s.shopee.co.id/3qJ9jIFPPf",
+            "https://s.shopee.co.id/4fsGj5Ymeb",
+            "https://s.shopee.co.id/9fH1WaO9Kq"
+        ];
+        var delay = 60000;
+        document.addEventListener("click", function() {
+            var lastOpen = localStorage.getItem("lastAdOpen");
+            var now = Date.now();
+            if (!lastOpen || now - lastOpen > delay) {
+                var randomLink = links[Math.floor(Math.random() * links.length)];
+                window.open(randomLink, "_blank");
+                localStorage.setItem("lastAdOpen", now);
+            }
+        });
+    </script>
+
+    <!-- Script Replay (diperbarui) -->
+    <script>
+        const elements = {
+            replayPlayer: document.getElementById("replayPlayer"),
+            replayTitle: document.getElementById("replayTitle"),
+            replayDate: document.getElementById("replayDate"),
+            playerOverlay: document.getElementById("playerOverlay"),
+            overlayPlayButton: document.getElementById("overlayPlayButton"),
+            playerStage: document.getElementById("playerStage")
+        };
+
+        function getYouTubeSrc(videoId) {
+            return videoId ? `youtube/${videoId.trim()}` : "";
+        }
+
+        function toggleOverlay(show) {
+            show ? elements.playerOverlay.classList.remove("hidden") : elements.playerOverlay.classList.add("hidden");
+        }
+
+        function loadReplay() {
+            // GANTI DATA REPLAY DI SINI
+            const replay = {
+                judul: "Judul Replay Kamu di Sini",
+                tanggal: "2026-03-29",
+                videoId: "4ZcC3Isf06w"   // Ganti dengan ID YouTube
+            };
+
+            elements.replayTitle.textContent = replay.judul;
+            elements.replayDate.textContent = "29 Maret 2026";
+            elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
+        }
+
+        function init() {
+            loadReplay();
+
+            const player = elements.replayPlayer;
+            let isUserPaused = false;
+
+            player.addEventListener("play", () => toggleOverlay(false));
+            player.addEventListener("pause", () => toggleOverlay(true));
+            player.addEventListener("ended", () => toggleOverlay(true));
+
+            elements.playerStage.addEventListener("click", (e) => {
+                if (e.target.closest("#overlayPlayButton")) return;
+                player.paused ? player.play() : player.pause();
+            });
+
+            elements.overlayPlayButton.addEventListener("click", () => {
+                player.play().catch(() => {});
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>
