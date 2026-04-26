@@ -78,120 +78,86 @@
     </main>
 
     <script type="module" src="https://cdn.vidstack.io/player"></script>
-    
+
+    <!-- Script Iklan -->
     <script>
-var links = [
-"https://s.shopee.co.id/20rVZGM43C",
-"https://s.shopee.co.id/4Aw7rZTpvo",
-"https://s.shopee.co.id/3qJ9jIFPPf",
-"https://s.shopee.co.id/4fsGj5Ymeb",
-"https://s.shopee.co.id/9fH1WaO9Kq"
-];
-
-var delay = 60000; // 60 detik
-
-document.addEventListener("click", function() {
-    var lastOpen = localStorage.getItem("lastAdOpen");
-    var now = Date.now();
-
-    if (!lastOpen || now - lastOpen > delay) {
-
-        var randomLink = links[Math.floor(Math.random() * links.length)];
-        window.open(randomLink, "_blank");
-
-        localStorage.setItem("lastAdOpen", now);
-    }
-});
-</script>
-    
-    <script>
-        
-        const DEVTOOLS_CONFIG = {
-            shortcuts: [
-                { keys: ['F12', '123'], modifiers: [] },
-                { keys: ['I', 'i', '73'], modifiers: ['ctrl', 'shift'] },
-                { keys: ['J', 'j', '74'], modifiers: ['ctrl', 'shift'] },
-                { keys: ['C', 'c', '67'], modifiers: ['ctrl', 'shift'] },
-                { keys: ['U', 'u', '85'], modifiers: ['ctrl'] },
-                { keys: ['I', 'i', '73'], modifiers: ['meta', 'alt'] },
-                { keys: ['J', 'j', '74'], modifiers: ['meta', 'alt'] },
-                { keys: ['C', 'c', '67'], modifiers: ['meta', 'alt'] },
-                { keys: ['U', 'u', '85'], modifiers: ['meta'] }
-            ],
-            windowThreshold: 160
-        };
-
-        function isBlockedKey(e) {
-            return DEVTOOLS_CONFIG.shortcuts.some(shortcut => {
-                const keyMatch = shortcut.keys.includes(e.key) || shortcut.keys.includes(String(e.keyCode));
-                if (!keyMatch) return false;
-
-                if (shortcut.modifiers.length === 0) return true;
-
-                const hasCtrl = shortcut.modifiers.includes('ctrl') && e.ctrlKey;
-                const hasShift = shortcut.modifiers.includes('shift') && e.shiftKey;
-                const hasMeta = shortcut.modifiers.includes('meta') && e.metaKey;
-                const hasAlt = shortcut.modifiers.includes('alt') && e.altKey;
-
-                const required = {
-                    ctrl: shortcut.modifiers.includes('ctrl'),
-                    shift: shortcut.modifiers.includes('shift'),
-                    meta: shortcut.modifiers.includes('meta'),
-                    alt: shortcut.modifiers.includes('alt')
-                };
-
-                return (
-                    (required.ctrl ? hasCtrl : !e.ctrlKey) &&
-                    (required.shift ? hasShift : !e.shiftKey) &&
-                    (required.meta ? hasMeta : !e.metaKey) &&
-                    (required.alt ? hasAlt : !e.altKey)
-                );
-            });
-        }
-
-        function blockDevToolsKeys(e) {
-            if (isBlockedKey(e)) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
+        var links = [
+            "https://s.shopee.co.id/20rVZGM43C",
+            "https://s.shopee.co.id/4Aw7rZTpvo",
+            "https://s.shopee.co.id/3qJ9jIFPPf",
+            "https://s.shopee.co.id/4fsGj5Ymeb",
+            "https://s.shopee.co.id/9fH1WaO9Kq"
+        ];
+        var delay = 60000;
+        document.addEventListener("click", function() {
+            var lastOpen = localStorage.getItem("lastAdOpen");
+            var now = Date.now();
+            if (!lastOpen || now - lastOpen > delay) {
+                var randomLink = links[Math.floor(Math.random() * links.length)];
+                window.open(randomLink, "_blank");
+                localStorage.setItem("lastAdOpen", now);
             }
-        }
-
-        let devToolsOpen = false;
-
-        function detectDevTools() {
-            const widthDiff = window.outerWidth - window.innerWidth;
-            const heightDiff = window.outerHeight - window.innerHeight;
-            const isDevToolsDetected = widthDiff > DEVTOOLS_CONFIG.windowThreshold || heightDiff > DEVTOOLS_CONFIG.windowThreshold;
-
-            if (isDevToolsDetected && !devToolsOpen) {
-                devToolsOpen = true;
-                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;"><h1>Access Denied</h1></div>';
-                window.location.href = 'about:blank';
-            } else if (!isDevToolsDetected) {
-                devToolsOpen = false;
-            }
-        }
-
-        
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            return false;
         });
-
-        
-        document.addEventListener('keydown', blockDevToolsKeys, true);
-        window.addEventListener('keydown', blockDevToolsKeys, true);
-        setInterval(detectDevTools, 500);
     </script>
 
+    <!-- Anti DevTools (Khusus Desktop Saja) -->
     <script>
-        const state = { 
-            allReplays: [], 
-            filteredReplays: [], 
-            currentReplay: null 
-        };
-       
+        function isMobile() {
+            return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   window.innerWidth <= 768;
+        }
+
+        // HANYA JALANKAN ANTI DEVTOOLS DI DESKTOP
+        if (!isMobile()) {
+            let devToolsOpen = false;
+
+            // Deteksi ukuran window
+            function detectDevTools() {
+                const widthDiff = window.outerWidth - window.innerWidth;
+                const heightDiff = window.outerHeight - window.innerHeight;
+
+                if ((widthDiff > 160 || heightDiff > 160) && !devToolsOpen) {
+                    devToolsOpen = true;
+                    document.body.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
+                            <div>
+                                <h1 style="font-size:2rem;margin-bottom:1rem;">🚫 Access Denied</h1>
+                                <p>Developer tools terdeteksi.</p>
+                            </div>
+                        </div>`;
+                    setTimeout(() => window.location.href = 'about:blank', 800);
+                }
+            }
+
+            // Block shortcut keys (F12, Ctrl+Shift+I, dll)
+            function blockDevToolsKeys(e) {
+                const blocked = [
+                    e.key === 'F12' || e.keyCode === 123,
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                    (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                    (e.ctrlKey && e.key === 'U') || (e.metaKey && e.key === 'U')
+                ];
+
+                if (blocked.some(Boolean)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }
+
+            // Event listeners - HANYA DI DESKTOP
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', blockDevToolsKeys, true);
+            window.addEventListener('keydown', blockDevToolsKeys, true);
+
+            // Jalankan deteksi setiap 500ms
+            setInterval(detectDevTools, 500);
+        }
+    </script>
+
+    <!-- Script Replay -->
+    <script>
+        const state = { allReplays: [], filteredReplays: [], currentReplay: null };
         let shouldAutoPlay = true;
         let isUserPaused = false;
 
@@ -214,24 +180,17 @@ document.addEventListener("click", function() {
         function formatDate(dateString) {
             if (!dateString) return "—";
             try {
-                return new Intl.DateTimeFormat("id-ID", { 
-                    day: "2-digit", 
-                    month: "long", 
-                    year: "numeric" 
-                }).format(new Date(dateString));
+                return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dateString));
             } catch { return dateString; }
         }
 
         function toggleOverlay(show) {
-            if (show) elements.playerOverlay.classList.remove("hidden");
-            else elements.playerOverlay.classList.add("hidden");
+            show ? elements.playerOverlay.classList.remove("hidden") : elements.playerOverlay.classList.add("hidden");
         }
 
         function forcePlay(player) {
             if (shouldAutoPlay && !isUserPaused) {
-                setTimeout(() => {
-                    player.play().catch(() => {});
-                }, 100);
+                setTimeout(() => player.play().catch(() => {}), 100);
             }
         }
 
@@ -240,7 +199,6 @@ document.addEventListener("click", function() {
             elements.replayTitle.textContent = replay.judul || "Tanpa Judul";
             elements.replayDate.textContent = formatDate(replay.tanggal);
             elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
-            
             isUserPaused = false;
             shouldAutoPlay = true;
             toggleOverlay(true);
@@ -248,55 +206,31 @@ document.addEventListener("click", function() {
 
         function init() {
             state.allReplays = [
-                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "Ugr4X9Zzq4A" }
+                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "4ZcC3Isf06w" }
             ];
             state.filteredReplays = [...state.allReplays];
-            
             if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
 
             const player = elements.replayPlayer;
 
-            player.addEventListener("play", () => {
-                toggleOverlay(false);
-                isUserPaused = false;
-            });
-
-            player.addEventListener("pause", () => {
-                toggleOverlay(true);
-                if (!isUserPaused) {
-                    forcePlay(player);
-                }
-            });
-
-            player.addEventListener("ended", () => {
-                toggleOverlay(true);
-                shouldAutoPlay = false;
-                isUserPaused = false;
-            });
-
+            player.addEventListener("play", () => { toggleOverlay(false); isUserPaused = false; });
+            player.addEventListener("pause", () => { toggleOverlay(true); if (!isUserPaused) forcePlay(player); });
+            player.addEventListener("ended", () => { toggleOverlay(true); shouldAutoPlay = false; });
             player.addEventListener("waiting", () => forcePlay(player));
             player.addEventListener("canplay", () => forcePlay(player));
             player.addEventListener("seeked", () => forcePlay(player));
-            player.addEventListener("fullscreen-change", () => forcePlay(player));
 
             elements.playerStage.addEventListener("click", (e) => {
                 if (e.target.closest("#overlayPlayButton")) return;
-
                 if (player.paused) {
-                    isUserPaused = false;
-                    shouldAutoPlay = true;
-                    player.play().catch(() => {});
+                    isUserPaused = false; shouldAutoPlay = true; player.play().catch(() => {});
                 } else {
-                    isUserPaused = true;
-                    shouldAutoPlay = false;
-                    player.pause();
+                    isUserPaused = true; shouldAutoPlay = false; player.pause();
                 }
             });
 
             elements.overlayPlayButton.addEventListener("click", () => {
-                isUserPaused = false;
-                shouldAutoPlay = true;
-                player.play().catch(() => {});
+                isUserPaused = false; shouldAutoPlay = true; player.play().catch(() => {});
             });
         }
 
