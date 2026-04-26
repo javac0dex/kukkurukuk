@@ -110,14 +110,76 @@
         });
     </script>
 
-    <!-- Script Replay (diperbarui) -->
+   <!-- Anti DevTools (Khusus Desktop Saja) -->
     <script>
+        function isMobile() {
+            return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   window.innerWidth <= 768;
+        }
+
+        // HANYA JALANKAN ANTI DEVTOOLS DI DESKTOP
+        if (!isMobile()) {
+            let devToolsOpen = false;
+
+            // Deteksi ukuran window
+            function detectDevTools() {
+                const widthDiff = window.outerWidth - window.innerWidth;
+                const heightDiff = window.outerHeight - window.innerHeight;
+
+                if ((widthDiff > 160 || heightDiff > 160) && !devToolsOpen) {
+                    devToolsOpen = true;
+                    document.body.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
+                            <div>
+                                <h1 style="font-size:2rem;margin-bottom:1rem;">🚫 Access Denied</h1>
+                                <p>Developer tools terdeteksi.</p>
+                            </div>
+                        </div>`;
+                    setTimeout(() => window.location.href = 'about:blank', 800);
+                }
+            }
+
+            // Block shortcut keys (F12, Ctrl+Shift+I, dll)
+            function blockDevToolsKeys(e) {
+                const blocked = [
+                    e.key === 'F12' || e.keyCode === 123,
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                    (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                    (e.ctrlKey && e.key === 'U') || (e.metaKey && e.key === 'U')
+                ];
+
+                if (blocked.some(Boolean)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }
+
+            // Event listeners - HANYA DI DESKTOP
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', blockDevToolsKeys, true);
+            window.addEventListener('keydown', blockDevToolsKeys, true);
+
+            // Jalankan deteksi setiap 500ms
+            setInterval(detectDevTools, 500);
+        }
+    </script>
+
+    <!-- Script Replay -->
+    <script>
+        const state = { allReplays: [], filteredReplays: [], currentReplay: null };
+        let shouldAutoPlay = true;
+        let isUserPaused = false;
+
         const elements = {
             replayPlayer: document.getElementById("replayPlayer"),
+            replayList: document.getElementById("replayList"),
+            searchInput: document.getElementById("searchInput"),
             replayTitle: document.getElementById("replayTitle"),
             replayDate: document.getElementById("replayDate"),
-            playerOverlay: document.getElementById("playerOverlay"),
+            playerStatus: document.getElementById("playerStatus"),
             overlayPlayButton: document.getElementById("overlayPlayButton"),
+            playerOverlay: document.getElementById("playerOverlay"),
             playerStage: document.getElementById("playerStage")
         };
 
@@ -125,40 +187,60 @@
             return videoId ? `youtube/${videoId.trim()}` : "";
         }
 
+        function formatDate(dateString) {
+            if (!dateString) return "—";
+            try {
+                return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dateString));
+            } catch { return dateString; }
+        }
+
         function toggleOverlay(show) {
             show ? elements.playerOverlay.classList.remove("hidden") : elements.playerOverlay.classList.add("hidden");
         }
 
-        function loadReplay() {
-            // GANTI DATA REPLAY DI SINI
-            const replay = {
-                judul: "Judul Replay Kamu di Sini",
-                tanggal: "2026-03-29",
-                videoId: "4ZcC3Isf06w"   // Ganti dengan ID YouTube
-            };
+        function forcePlay(player) {
+            if (shouldAutoPlay && !isUserPaused) {
+                setTimeout(() => player.play().catch(() => {}), 100);
+            }
+        }
 
-            elements.replayTitle.textContent = replay.judul;
-            elements.replayDate.textContent = "29 Maret 2026";
+        function loadReplayIntoPlayer(replay) {
+            state.currentReplay = replay;
+            elements.replayTitle.textContent = replay.judul || "Tanpa Judul";
+            elements.replayDate.textContent = formatDate(replay.tanggal);
             elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
+            isUserPaused = false;
+            shouldAutoPlay = true;
+            toggleOverlay(true);
         }
 
         function init() {
-            loadReplay();
+            state.allReplays = [
+                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "4ZcC3Isf06w" }
+            ];
+            state.filteredReplays = [...state.allReplays];
+            if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
 
             const player = elements.replayPlayer;
-            let isUserPaused = false;
 
-            player.addEventListener("play", () => toggleOverlay(false));
-            player.addEventListener("pause", () => toggleOverlay(true));
-            player.addEventListener("ended", () => toggleOverlay(true));
+            player.addEventListener("play", () => { toggleOverlay(false); isUserPaused = false; });
+            player.addEventListener("pause", () => { toggleOverlay(true); if (!isUserPaused) forcePlay(player); });
+            player.addEventListener("ended", () => { toggleOverlay(true); shouldAutoPlay = false; });
+            player.addEventListener("waiting", () => forcePlay(player));
+            player.addEventListener("canplay", () => forcePlay(player));
+            player.addEventListener("seeked", () => forcePlay(player));
 
             elements.playerStage.addEventListener("click", (e) => {
                 if (e.target.closest("#overlayPlayButton")) return;
-                player.paused ? player.play() : player.pause();
+                if (player.paused) {
+                    isUserPaused = false; shouldAutoPlay = true; player.play().catch(() => {});
+                } else {
+                    isUserPaused = true; shouldAutoPlay = false; player.pause();
+                }
             });
 
             elements.overlayPlayButton.addEventListener("click", () => {
-                player.play().catch(() => {});
+                isUserPaused = false; shouldAutoPlay = true; player.play().catch(() => {});
             });
         }
 
