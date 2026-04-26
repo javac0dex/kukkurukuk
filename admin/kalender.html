@@ -20,85 +20,12 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 30px;
             margin-bottom: 30px;
-        }
-
-        /* KELOLA EVENT SECTION */
-        .event-manager {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #ff6b35;
-        }
-
-        .event-manager h2 {
-            color: #ff6b35;
-            margin-bottom: 25px;
-            font-size: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .date-display {
-            background: #1a1a2e;
-            border: 2px solid #ff6b35;
-            color: #ff6b35;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #b0b0b0;
-            font-size: 11px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px 12px;
-            background: #0f3460;
-            border: 1px solid #ff6b35;
-            color: #e0e0e0;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 13px;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #ff8c5a;
-            box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-top: 22px;
         }
 
         button {
@@ -113,46 +40,13 @@
             transition: all 0.3s ease;
         }
 
-        .btn-save {
-            background: #ff6b35;
-            color: white;
-        }
-
-        .btn-save:hover {
-            background: #ff8c5a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
-        }
-
-        .btn-delete {
-            background: transparent;
-            color: #ff6b35;
-            border: 2px solid #ff6b35;
-        }
-
-        .btn-delete:hover {
-            background: rgba(255, 107, 53, 0.1);
-            border-color: #ff8c5a;
-            color: #ff8c5a;
-        }
-
-        .btn-clear {
-            background: #2a2a3e;
-            color: #888;
-            border: 1px solid #444;
-        }
-
-        .btn-clear:hover {
-            background: #3a3a4e;
-            color: #aaa;
-        }
-
         /* EVENT LIST SECTION */
         .event-list {
             background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
             padding: 30px;
             border-radius: 12px;
             border: 1px solid #ff6b35;
+            order: 2;
         }
 
         .event-list h2 {
@@ -227,11 +121,11 @@
 
         /* CALENDAR SECTION */
         .calendar-section {
-            grid-column: 1 / -1;
             background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
             padding: 30px;
             border-radius: 12px;
             border: 1px solid #ff6b35;
+            order: 1;
         }
 
         .calendar-section h2 {
@@ -345,49 +239,13 @@
 
         @media (max-width: 1024px) {
             .container {
-                grid-template-columns: 1fr;
-            }
-
-            .calendar-section {
-                grid-column: 1;
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- KELOLA EVENT -->
-        <div class="event-manager">
-            <h2>Kelola Event</h2>
-            <div class="date-display" id="dateDisplay">Minggu, 26 April 2026</div>
-
-            <div class="form-group">
-                <label for="eventDate">PILIH TANGGAL</label>
-                <input type="date" id="eventDate">
-            </div>
-
-            <div class="form-group">
-                <label for="eventTitle">JUDUL EVENT</label>
-                <input type="text" id="eventTitle" placeholder="Contoh: Cara Meminum Ramune">
-            </div>
-
-            <div class="form-group">
-                <label for="eventLink">LINK DIRECT</label>
-                <input type="url" id="eventLink" placeholder="http://yup48.online/admin/testing/">
-            </div>
-
-            <div class="form-group">
-                <label for="eventButton">TEKS TOMBOL</label>
-                <input type="text" id="eventButton" placeholder="Contoh: Stream disini">
-            </div>
-
-            <div class="button-group">
-                <button class="btn-save" onclick="saveEvent()">SIMPAN EVENT</button>
-                <button class="btn-delete" onclick="deleteEvent()">HAPUS EVENT</button>
-                <button class="btn-clear" onclick="clearForm()">CLEAR ALL</button>
-            </div>
-        </div>
-
         <!-- DAFTAR EVENT -->
         <div class="event-list">
             <h2>Daftar Event</h2>
@@ -448,63 +306,7 @@
             return `${dayNames[date.getDay()]}, ${day} ${monthNames[date.getMonth()]} ${year}`;
         }
 
-        // Set tanggal input saat dipilih
-        document.getElementById('eventDate').addEventListener('change', function() {
-            selectedDate = this.value;
-            document.getElementById('dateDisplay').textContent = formatDisplayDate(selectedDate);
-        });
 
-        // Simpan event
-        function saveEvent() {
-            const date = selectedDate || document.getElementById('eventDate').value;
-            const title = document.getElementById('eventTitle').value.trim();
-            const link = document.getElementById('eventLink').value.trim();
-            const buttonText = document.getElementById('eventButton').value.trim();
-
-            if (!date || !title || !link || !buttonText) {
-                alert('Mohon lengkapi semua field!');
-                return;
-            }
-
-            // Cek apakah event sudah ada
-            const existingIndex = events.findIndex(e => e.date === date);
-            if (existingIndex >= 0) {
-                events[existingIndex] = { date, title, link, buttonText };
-            } else {
-                events.push({ date, title, link, buttonText });
-            }
-
-            // Sort events by date
-            events.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            clearForm();
-            renderEventList();
-            renderCalendar();
-        }
-
-        // Hapus event
-        function deleteEvent() {
-            const date = selectedDate || document.getElementById('eventDate').value;
-            if (!date) {
-                alert('Pilih tanggal event yang ingin dihapus!');
-                return;
-            }
-
-            events = events.filter(e => e.date !== date);
-            clearForm();
-            renderEventList();
-            renderCalendar();
-        }
-
-        // Clear form
-        function clearForm() {
-            document.getElementById('eventDate').value = '';
-            document.getElementById('eventTitle').value = '';
-            document.getElementById('eventLink').value = '';
-            document.getElementById('eventButton').value = '';
-            selectedDate = null;
-            document.getElementById('dateDisplay').textContent = formatDisplayDate(formatDate(new Date(2026, 3, 26)));
-        }
 
         // Render daftar event
         function renderEventList() {
@@ -571,7 +373,7 @@
                 }
                 
                 html += `
-                    <div class="${className}" onclick="selectDateFromCalendar('${dateStr}')">
+                    <div class="${className}">
                         <div class="day-number">${day}</div>
                         ${eventIndicator}
                     </div>
@@ -587,23 +389,7 @@
             grid.innerHTML = html;
         }
 
-        // Pilih tanggal dari kalender
-        function selectDateFromCalendar(dateStr) {
-            selectedDate = dateStr;
-            document.getElementById('eventDate').value = dateStr;
-            document.getElementById('dateDisplay').textContent = formatDisplayDate(dateStr);
 
-            const event = events.find(e => e.date === dateStr);
-            if (event) {
-                document.getElementById('eventTitle').value = event.title;
-                document.getElementById('eventLink').value = event.link;
-                document.getElementById('eventButton').value = event.buttonText;
-            } else {
-                document.getElementById('eventTitle').value = '';
-                document.getElementById('eventLink').value = '';
-                document.getElementById('eventButton').value = '';
-            }
-        }
 
         // Navigasi bulan
         function prevMonth() {
