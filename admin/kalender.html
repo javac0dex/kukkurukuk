@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalender Interaktif</title>
+    <title>Kalender Event</title>
     <style>
         * {
             margin: 0;
@@ -12,157 +12,48 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            background: #1a1a2e;
             color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-            color: #ff6b35;
-            text-shadow: 0 2px 10px rgba(255, 107, 53, 0.2);
-        }
-
-        .current-date {
-            font-size: 14px;
-            color: #a0a0a0;
-            letter-spacing: 1px;
-        }
-
-        .calendar-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
-            margin-top: 20px;
+            margin-bottom: 30px;
         }
 
-        @media (max-width: 1024px) {
-            .calendar-wrapper {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .calendar-section {
-            background: rgba(26, 31, 46, 0.8);
+        /* KELOLA EVENT SECTION */
+        .event-manager {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 30px;
             border-radius: 12px;
-            padding: 25px;
-            border: 1px solid rgba(255, 107, 53, 0.2);
-            backdrop-filter: blur(10px);
+            border: 1px solid #ff6b35;
         }
 
-        .month-year {
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 20px;
+        .event-manager h2 {
             color: #ff6b35;
-        }
-
-        .weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .weekday {
-            text-align: center;
-            font-weight: 600;
-            font-size: 12px;
-            color: #ff6b35;
-            padding: 8px 0;
-            text-transform: uppercase;
-        }
-
-        .days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-        }
-
-        .day {
-            aspect-ratio: 1;
-            background: rgba(255, 107, 53, 0.05);
-            border: 1px solid rgba(255, 107, 53, 0.1);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            padding: 4px;
-            font-size: 12px;
-        }
-
-        .day:hover {
-            background: rgba(255, 107, 53, 0.15);
-            border-color: rgba(255, 107, 53, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .day.other-month {
-            color: #666;
-            cursor: default;
-        }
-
-        .day.other-month:hover {
-            background: rgba(255, 107, 53, 0.05);
-            transform: none;
-        }
-
-        .day.today {
-            background: rgba(255, 107, 53, 0.2);
-            border-color: #ff6b35;
-            font-weight: bold;
-            color: #ff6b35;
-        }
-
-        .day.has-event {
-            background: rgba(255, 107, 53, 0.25);
-            border-color: #ff6b35;
-            box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
-        }
-
-        .day-number {
-            font-weight: 600;
-        }
-
-        .event-indicator {
-            width: 4px;
-            height: 4px;
-            background: #ff6b35;
-            border-radius: 50%;
-            margin-top: 2px;
-        }
-
-        .event-panel {
-            background: rgba(26, 31, 46, 0.8);
-            border-radius: 12px;
-            padding: 25px;
-            border: 1px solid rgba(255, 107, 53, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .panel-title {
+            margin-bottom: 25px;
             font-size: 20px;
-            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .date-display {
+            background: #1a1a2e;
+            border: 2px solid #ff6b35;
             color: #ff6b35;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
         }
 
         .form-group {
@@ -171,10 +62,10 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 6px;
-            font-size: 12px;
-            font-weight: 600;
             color: #b0b0b0;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -183,512 +74,553 @@
         .form-group textarea {
             width: 100%;
             padding: 10px 12px;
-            background: rgba(255, 107, 53, 0.05);
-            border: 1px solid rgba(255, 107, 53, 0.2);
-            border-radius: 6px;
+            background: #0f3460;
+            border: 1px solid #ff6b35;
             color: #e0e0e0;
+            border-radius: 6px;
             font-family: inherit;
-            transition: all 0.3s ease;
             font-size: 13px;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            background: rgba(255, 107, 53, 0.1);
-            border-color: #ff6b35;
-            box-shadow: 0 0 8px rgba(255, 107, 53, 0.2);
+            border-color: #ff8c5a;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 60px;
         }
 
         .button-group {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 22px;
         }
 
-        .btn {
-            flex: 1;
+        button {
             padding: 10px 16px;
             border: none;
             border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            transition: all 0.3s ease;
         }
 
         .btn-save {
             background: #ff6b35;
-            color: #fff;
+            color: white;
         }
 
         .btn-save:hover {
-            background: #ff8a5c;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+            background: #ff8c5a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
         }
 
         .btn-delete {
-            background: rgba(255, 107, 53, 0.1);
+            background: transparent;
             color: #ff6b35;
-            border: 1px solid #ff6b35;
+            border: 2px solid #ff6b35;
         }
 
         .btn-delete:hover {
-            background: rgba(255, 107, 53, 0.2);
+            background: rgba(255, 107, 53, 0.1);
+            border-color: #ff8c5a;
+            color: #ff8c5a;
         }
 
         .btn-clear {
-            background: rgba(100, 100, 100, 0.2);
-            color: #a0a0a0;
-            border: 1px solid rgba(100, 100, 100, 0.3);
+            background: #2a2a3e;
+            color: #888;
+            border: 1px solid #444;
         }
 
         .btn-clear:hover {
-            background: rgba(100, 100, 100, 0.3);
-            color: #e0e0e0;
+            background: #3a3a4e;
+            color: #aaa;
         }
 
-        .selected-date {
-            background: rgba(255, 107, 53, 0.1);
+        /* EVENT LIST SECTION */
+        .event-list {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 30px;
+            border-radius: 12px;
             border: 1px solid #ff6b35;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 16px;
-            text-align: center;
-            color: #ff6b35;
-            font-weight: 600;
         }
 
-        .events-list {
-            margin-top: 20px;
+        .event-list h2 {
+            color: #ff6b35;
+            margin-bottom: 25px;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .event-item {
-            background: rgba(255, 107, 53, 0.08);
-            border-left: 3px solid #ff6b35;
-            border-radius: 4px;
-            padding: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
+            background: rgba(15, 52, 96, 0.6);
+            border-left: 4px solid #ff6b35;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 6px;
             transition: all 0.3s ease;
         }
 
         .event-item:hover {
-            background: rgba(255, 107, 53, 0.15);
-            transform: translateX(4px);
+            background: rgba(15, 52, 96, 0.9);
+            border-left-color: #ff8c5a;
         }
 
-        .event-item-date {
-            font-size: 11px;
+        .event-date {
             color: #ff6b35;
-            font-weight: 600;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-
-        .event-item-title {
-            color: #e0e0e0;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-
-        .event-item-link {
             font-size: 11px;
-            color: #a0a0a0;
-            word-break: break-all;
+            font-weight: bold;
+            text-transform: uppercase;
             margin-bottom: 6px;
         }
 
-        .event-item-button {
+        .event-title {
+            color: #e0e0e0;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .event-link {
+            color: #888;
+            font-size: 12px;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+
+        .event-button {
             display: inline-block;
             background: #ff6b35;
             color: white;
-            padding: 4px 8px;
+            padding: 6px 14px;
             border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
             text-decoration: none;
-            font-size: 10px;
-            font-weight: 600;
+            cursor: pointer;
+            border: none;
             transition: all 0.3s ease;
         }
 
-        .event-item-button:hover {
-            background: #ff8a5c;
+        .event-button:hover {
+            background: #ff8c5a;
+            transform: translateY(-2px);
         }
 
         .no-events {
-            color: #666;
             text-align: center;
-            padding: 40px 20px;
+            color: #666;
+            padding: 30px 20px;
             font-size: 13px;
         }
 
-        .month-nav {
+        /* CALENDAR SECTION */
+        .calendar-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #ff6b35;
+        }
+
+        .calendar-section h2 {
+            color: #ff6b35;
+            margin-bottom: 25px;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            gap: 15px;
         }
 
-        .month-nav button {
-            background: rgba(255, 107, 53, 0.1);
-            border: 1px solid rgba(255, 107, 53, 0.2);
-            color: #ff6b35;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
+        .calendar-header button {
+            background: #ff6b35;
+            color: white;
+            padding: 8px 14px;
             font-size: 12px;
-            transition: all 0.3s ease;
         }
 
-        .month-nav button:hover {
-            background: rgba(255, 107, 53, 0.2);
+        .calendar-header button:hover {
+            background: #ff8c5a;
+        }
+
+        .current-month {
+            color: #ff6b35;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            flex: 1;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day-header {
+            background: #0f3460;
+            color: #ff6b35;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-radius: 6px;
+        }
+
+        .calendar-day {
+            background: #0f3460;
+            border: 1px solid #2a5a8f;
+            padding: 12px 8px;
+            min-height: 90px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #1a4a7f;
+            border-color: #ff6b35;
+        }
+
+        .calendar-day.other-month {
+            color: #555;
+        }
+
+        .calendar-day.has-event {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: #ff6b35;
+        }
+
+        .calendar-day.has-event .day-number {
+            color: #ff6b35;
+            font-weight: bold;
+        }
+
+        .day-number {
+            color: #e0e0e0;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .day-event-title {
+            font-size: 10px;
+            color: #ff6b35;
+            margin-top: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .event-dot {
+            width: 5px;
+            height: 5px;
+            background: #ff6b35;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 3px;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-section {
+                grid-column: 1;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📅 Kalender Interaktif</h1>
-            <div class="current-date" id="currentDate"></div>
+        <!-- KELOLA EVENT -->
+        <div class="event-manager">
+            <h2>Kelola Event</h2>
+            <div class="date-display" id="dateDisplay">Minggu, 26 April 2026</div>
+
+            <div class="form-group">
+                <label for="eventDate">PILIH TANGGAL</label>
+                <input type="date" id="eventDate">
+            </div>
+
+            <div class="form-group">
+                <label for="eventTitle">JUDUL EVENT</label>
+                <input type="text" id="eventTitle" placeholder="Contoh: Cara Meminum Ramune">
+            </div>
+
+            <div class="form-group">
+                <label for="eventLink">LINK DIRECT</label>
+                <input type="url" id="eventLink" placeholder="http://yup48.online/admin/testing/">
+            </div>
+
+            <div class="form-group">
+                <label for="eventButton">TEKS TOMBOL</label>
+                <input type="text" id="eventButton" placeholder="Contoh: Stream disini">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-save" onclick="saveEvent()">SIMPAN EVENT</button>
+                <button class="btn-delete" onclick="deleteEvent()">HAPUS EVENT</button>
+                <button class="btn-clear" onclick="clearForm()">CLEAR ALL</button>
+            </div>
         </div>
 
-        <div class="calendar-wrapper">
-            <!-- Kalender -->
-            <div class="calendar-section">
-                <div class="month-nav">
-                    <button id="prevBtn">← Bulan Lalu</button>
-                    <div class="month-year" id="monthYear"></div>
-                    <button id="nextBtn">Bulan Depan →</button>
-                </div>
-
-                <div class="weekdays">
-                    <div class="weekday">Min</div>
-                    <div class="weekday">Sen</div>
-                    <div class="weekday">Sel</div>
-                    <div class="weekday">Rab</div>
-                    <div class="weekday">Kam</div>
-                    <div class="weekday">Jum</div>
-                    <div class="weekday">Sab</div>
-                </div>
-
-                <div class="days" id="daysContainer"></div>
+        <!-- DAFTAR EVENT -->
+        <div class="event-list">
+            <h2>Daftar Event</h2>
+            <div id="eventListContainer">
+                <div class="no-events">Belum ada event</div>
             </div>
+        </div>
 
-            <!-- Panel Event -->
-            <div class="event-panel">
-                <div class="panel-title">Kelola Event</div>
-                
-                <div class="selected-date" id="selectedDate" style="display: none;"></div>
-
-                <div class="form-group">
-                    <label>Pilih Tanggal</label>
-                    <input type="date" id="dateInput">
-                </div>
-
-                <div class="form-group">
-                    <label>Judul Event</label>
-                    <input type="text" id="titleInput" placeholder="Contoh: Cara Meminum Ramune">
-                </div>
-
-                <div class="form-group">
-                    <label>Link Direct</label>
-                    <input type="url" id="linkInput" placeholder="https://example.com">
-                </div>
-
-                <div class="form-group">
-                    <label>Teks Tombol</label>
-                    <input type="text" id="buttonInput" placeholder="Contoh: Stream disini" value="Buka">
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-save" id="saveBtn">Simpan Event</button>
-                    <button class="btn btn-delete" id="deleteBtn">Hapus Event</button>
-                    <button class="btn btn-clear" id="clearBtn">Clear All</button>
-                </div>
-
-                <div class="events-list" id="eventsList">
-                    <div class="no-events">Belum ada event. Pilih tanggal untuk menambah event.</div>
-                </div>
+        <!-- KALENDER -->
+        <div class="calendar-section">
+            <h2>Kalender Event</h2>
+            <div class="calendar-header">
+                <button onclick="prevMonth()">← BULAN LALU</button>
+                <div class="current-month" id="monthDisplay"></div>
+                <button onclick="nextMonth()">BULAN DEPAN →</button>
             </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
         </div>
     </div>
 
     <script>
-        // Data storage
-        let events = JSON.parse(localStorage.getItem('calendarEvents')) || {};
-        let currentDate = new Date();
+        // DATA EVENT - TAMBAHKAN EVENT DI SINI
+        let events = [
+            {
+                date: '2026-04-26',
+                title: 'Cara Meminum Ramune',
+                link: 'http://yup48.online/admin/testing/',
+                buttonText: 'Stream disini'
+            },
+            {
+                date: '2026-04-03',
+                title: 'werf',
+                link: 'asdfdf',
+                buttonText: 'Batu'
+            }
+        ];
+
+        let currentDate = new Date(2026, 3, 26); // April 26, 2026
         let selectedDate = null;
 
-        // Update current date display
-        function updateCurrentDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', options);
+        // Nama hari dan bulan
+        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        // Format tanggal ke YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
-        // Initialize calendar
-        function initCalendar() {
-            updateCurrentDate();
-            renderCalendar();
-            setDefaultDate();
-            updateEventsList();
+        // Format tanggal display
+        function formatDisplayDate(dateString) {
+            const [year, month, day] = dateString.split('-');
+            const date = new Date(year, month - 1, day);
+            return `${dayNames[date.getDay()]}, ${day} ${monthNames[date.getMonth()]} ${year}`;
+        }
 
-            // Tambah contoh default untuk 26 April 2026
-            if (!events['2026-04-26']) {
-                events['2026-04-26'] = {
-                    title: 'Cara Meminum Ramune',
-                    link: 'http://yup48.online/admin/testing/',
-                    button: 'Stream disini'
-                };
-                saveEvents();
+        // Set tanggal input saat dipilih
+        document.getElementById('eventDate').addEventListener('change', function() {
+            selectedDate = this.value;
+            document.getElementById('dateDisplay').textContent = formatDisplayDate(selectedDate);
+        });
+
+        // Simpan event
+        function saveEvent() {
+            const date = selectedDate || document.getElementById('eventDate').value;
+            const title = document.getElementById('eventTitle').value.trim();
+            const link = document.getElementById('eventLink').value.trim();
+            const buttonText = document.getElementById('eventButton').value.trim();
+
+            if (!date || !title || !link || !buttonText) {
+                alert('Mohon lengkapi semua field!');
+                return;
             }
+
+            // Cek apakah event sudah ada
+            const existingIndex = events.findIndex(e => e.date === date);
+            if (existingIndex >= 0) {
+                events[existingIndex] = { date, title, link, buttonText };
+            } else {
+                events.push({ date, title, link, buttonText });
+            }
+
+            // Sort events by date
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            clearForm();
+            renderEventList();
+            renderCalendar();
         }
 
-        // Set default date ke hari ini
-        function setDefaultDate() {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            document.getElementById('dateInput').value = `${year}-${month}-${day}`;
+        // Hapus event
+        function deleteEvent() {
+            const date = selectedDate || document.getElementById('eventDate').value;
+            if (!date) {
+                alert('Pilih tanggal event yang ingin dihapus!');
+                return;
+            }
+
+            events = events.filter(e => e.date !== date);
+            clearForm();
+            renderEventList();
+            renderCalendar();
         }
 
-        // Render calendar
+        // Clear form
+        function clearForm() {
+            document.getElementById('eventDate').value = '';
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventLink').value = '';
+            document.getElementById('eventButton').value = '';
+            selectedDate = null;
+            document.getElementById('dateDisplay').textContent = formatDisplayDate(formatDate(new Date(2026, 3, 26)));
+        }
+
+        // Render daftar event
+        function renderEventList() {
+            const container = document.getElementById('eventListContainer');
+            
+            if (events.length === 0) {
+                container.innerHTML = '<div class="no-events">Belum ada event</div>';
+                return;
+            }
+
+            container.innerHTML = events.map(event => {
+                const [year, month, day] = event.date.split('-');
+                const dateObj = new Date(year, month - 1, day);
+                const dateStr = `${dayNames[dateObj.getDay()].toUpperCase().substring(0, 3)} ${day} ${monthNames[month - 1].toUpperCase().substring(0, 3)} ${year}`.toUpperCase();
+
+                return `
+                    <div class="event-item">
+                        <div class="event-date">${dateStr}</div>
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-link">${event.link}</div>
+                        <a href="${event.link}" target="_blank" class="event-button">${event.buttonText}</a>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render kalender
         function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthDisplay = document.getElementById('monthDisplay');
+            
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-
-            // Set month/year title
-            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
-
-            // Get first day of month and number of days
+            
+            monthDisplay.textContent = `${monthNames[month]} ${year}`;
+            
+            // Hari minggu header
+            const dayHeaders = ['MIN', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
+            let html = dayHeaders.map(day => `<div class="calendar-day-header">${day}</div>`).join('');
+            
+            // Tanggal bulan sebelumnya
             const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-            const daysContainer = document.getElementById('daysContainer');
-            daysContainer.innerHTML = '';
-
-            // Previous month days
+            const lastDayPrevMonth = new Date(year, month, 0).getDate();
+            
             for (let i = firstDay - 1; i >= 0; i--) {
-                const day = document.createElement('div');
-                day.className = 'day other-month';
-                day.textContent = daysInPrevMonth - i;
-                daysContainer.appendChild(day);
+                const day = lastDayPrevMonth - i;
+                html += `<div class="calendar-day other-month"><div class="day-number">${day}</div></div>`;
             }
-
-            // Current month days
-            const today = new Date();
-            for (let i = 1; i <= daysInMonth; i++) {
-                const day = document.createElement('div');
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-
-                day.className = 'day';
-
-                // Check if today
-                if (year === today.getFullYear() &&
-                    month === today.getMonth() &&
-                    i === today.getDate()) {
-                    day.classList.add('today');
+            
+            // Tanggal bulan ini
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            
+            for (let day = 1; day <= lastDay; day++) {
+                const dateStr = formatDate(new Date(year, month, day));
+                const hasEvent = events.some(e => e.date === dateStr);
+                
+                let className = 'calendar-day';
+                if (hasEvent) className += ' has-event';
+                
+                let eventIndicator = '';
+                const event = events.find(e => e.date === dateStr);
+                if (event) {
+                    eventIndicator = `<div class="day-event-title"><span class="event-dot"></span>${event.title.substring(0, 15)}</div>`;
                 }
-
-                // Check if has event
-                if (events[dateStr]) {
-                    day.classList.add('has-event');
-                }
-
-                day.innerHTML = `<div class="day-number">${i}</div>`;
-                if (events[dateStr]) {
-                    day.innerHTML += '<div class="event-indicator"></div>';
-                }
-
-                day.addEventListener('click', () => selectDate(dateStr));
-                daysContainer.appendChild(day);
-            }
-
-            // Next month days
-            const totalCells = daysContainer.children.length;
-            const remainingCells = 42 - totalCells;
-            for (let i = 1; i <= remainingCells; i++) {
-                const day = document.createElement('div');
-                day.className = 'day other-month';
-                day.textContent = i;
-                daysContainer.appendChild(day);
-            }
-        }
-
-        // Select date
-        function selectDate(dateStr) {
-            selectedDate = dateStr;
-            document.getElementById('dateInput').value = dateStr;
-
-            // Show selected date
-            const selectedDateDiv = document.getElementById('selectedDate');
-            const date = new Date(dateStr + 'T00:00:00');
-            selectedDateDiv.textContent = date.toLocaleDateString('id-ID', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            selectedDateDiv.style.display = 'block';
-
-            // Load event data if exists
-            if (events[dateStr]) {
-                document.getElementById('titleInput').value = events[dateStr].title;
-                document.getElementById('linkInput').value = events[dateStr].link;
-                document.getElementById('buttonInput').value = events[dateStr].button;
-            } else {
-                document.getElementById('titleInput').value = '';
-                document.getElementById('linkInput').value = '';
-                document.getElementById('buttonInput').value = 'Buka';
-            }
-        }
-
-        // Save event
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            const dateInput = document.getElementById('dateInput').value;
-            const title = document.getElementById('titleInput').value.trim();
-            const link = document.getElementById('linkInput').value.trim();
-            const button = document.getElementById('buttonInput').value.trim() || 'Buka';
-
-            if (!dateInput) {
-                alert('Pilih tanggal terlebih dahulu!');
-                return;
-            }
-
-            if (!title || !link) {
-                alert('Judul dan link harus diisi!');
-                return;
-            }
-
-            events[dateInput] = {
-                title: title,
-                link: link,
-                button: button
-            };
-
-            saveEvents();
-            renderCalendar();
-            updateEventsList();
-            selectDate(dateInput);
-        });
-
-        // Delete event
-        document.getElementById('deleteBtn').addEventListener('click', () => {
-            const dateInput = document.getElementById('dateInput').value;
-            if (!dateInput) {
-                alert('Pilih tanggal terlebih dahulu!');
-                return;
-            }
-
-            if (events[dateInput]) {
-                delete events[dateInput];
-                saveEvents();
-                renderCalendar();
-                updateEventsList();
-                document.getElementById('titleInput').value = '';
-                document.getElementById('linkInput').value = '';
-                alert('Event berhasil dihapus!');
-            }
-        });
-
-        // Clear all events
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            if (confirm('Hapus semua event? Tindakan ini tidak bisa dibatalkan!')) {
-                events = {};
-                saveEvents();
-                renderCalendar();
-                updateEventsList();
-                document.getElementById('titleInput').value = '';
-                document.getElementById('linkInput').value = '';
-                alert('Semua event berhasil dihapus!');
-            }
-        });
-
-        // Save to localStorage
-        function saveEvents() {
-            localStorage.setItem('calendarEvents', JSON.stringify(events));
-        }
-
-        // Update events list
-        function updateEventsList() {
-            const eventsList = document.getElementById('eventsList');
-            const sortedEvents = Object.keys(events).sort().reverse();
-
-            if (sortedEvents.length === 0) {
-                eventsList.innerHTML = '<div class="no-events">Belum ada event. Pilih tanggal untuk menambah event.</div>';
-                return;
-            }
-
-            eventsList.innerHTML = '';
-            sortedEvents.forEach(dateStr => {
-                const event = events[dateStr];
-                const date = new Date(dateStr + 'T00:00:00');
-                const dateFormatted = date.toLocaleDateString('id-ID', {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-
-                const eventDiv = document.createElement('div');
-                eventDiv.className = 'event-item';
-                eventDiv.innerHTML = `
-                    <div class="event-item-date">${dateFormatted}</div>
-                    <div class="event-item-title">${event.title}</div>
-                    <div class="event-item-link">${event.link}</div>
-                    <a href="${event.link}" target="_blank" class="event-item-button">${event.button}</a>
+                
+                html += `
+                    <div class="${className}" onclick="selectDateFromCalendar('${dateStr}')">
+                        <div class="day-number">${day}</div>
+                        ${eventIndicator}
+                    </div>
                 `;
-                eventDiv.addEventListener('click', () => selectDate(dateStr));
-                eventsList.appendChild(eventDiv);
-            });
+            }
+            
+            // Tanggal bulan depan
+            const totalCells = Math.ceil((firstDay + lastDay) / 7) * 7;
+            for (let day = 1; day <= totalCells - firstDay - lastDay; day++) {
+                html += `<div class="calendar-day other-month"><div class="day-number">${day}</div></div>`;
+            }
+            
+            grid.innerHTML = html;
         }
 
-        // Month navigation
-        document.getElementById('prevBtn').addEventListener('click', () => {
+        // Pilih tanggal dari kalender
+        function selectDateFromCalendar(dateStr) {
+            selectedDate = dateStr;
+            document.getElementById('eventDate').value = dateStr;
+            document.getElementById('dateDisplay').textContent = formatDisplayDate(dateStr);
+
+            const event = events.find(e => e.date === dateStr);
+            if (event) {
+                document.getElementById('eventTitle').value = event.title;
+                document.getElementById('eventLink').value = event.link;
+                document.getElementById('eventButton').value = event.buttonText;
+            } else {
+                document.getElementById('eventTitle').value = '';
+                document.getElementById('eventLink').value = '';
+                document.getElementById('eventButton').value = '';
+            }
+        }
+
+        // Navigasi bulan
+        function prevMonth() {
             currentDate.setMonth(currentDate.getMonth() - 1);
             renderCalendar();
-        });
+        }
 
-        document.getElementById('nextBtn').addEventListener('click', () => {
+        function nextMonth() {
             currentDate.setMonth(currentDate.getMonth() + 1);
             renderCalendar();
+        }
+
+        // Inisialisasi
+        window.addEventListener('load', function() {
+            renderEventList();
+            renderCalendar();
         });
-
-        // Date input change
-        document.getElementById('dateInput').addEventListener('change', (e) => {
-            if (e.target.value) {
-                selectedDate = e.target.value;
-                const date = new Date(e.target.value + 'T00:00:00');
-                currentDate = date;
-                renderCalendar();
-
-                // Load event data if exists
-                if (events[e.target.value]) {
-                    document.getElementById('titleInput').value = events[e.target.value].title;
-                    document.getElementById('linkInput').value = events[e.target.value].link;
-                    document.getElementById('buttonInput').value = events[e.target.value].button;
-                } else {
-                    document.getElementById('titleInput').value = '';
-                    document.getElementById('linkInput').value = '';
-                    document.getElementById('buttonInput').value = 'Buka';
-                }
-            }
-        });
-
-        // Initialize
-        initCalendar();
     </script>
 </body>
 </html>
