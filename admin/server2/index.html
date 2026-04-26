@@ -88,7 +88,7 @@
             "https://s.shopee.co.id/4fsGj5Ymeb",
             "https://s.shopee.co.id/9fH1WaO9Kq"
         ];
-        var delay = 60000; // 60 detik
+        var delay = 60000;
         document.addEventListener("click", function() {
             var lastOpen = localStorage.getItem("lastAdOpen");
             var now = Date.now();
@@ -100,47 +100,23 @@
         });
     </script>
 
-    <!-- Script Anti DevTools (Sudah Diperbaiki untuk Mobile Fullscreen) -->
+    <!-- Anti DevTools (Diperbaiki khusus Mobile) -->
     <script>
-        const DEVTOOLS_CONFIG = {
-            desktopThreshold: 160,
-            mobileThreshold: 80,
-            checkInterval: 500
-        };
-
         let devToolsOpen = false;
-
-        function isFullscreen() {
-            return !!(
-                document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                document.msFullscreenElement ||
-                (window.innerHeight === screen.height && window.innerWidth === screen.width)
-            );
-        }
 
         function isMobile() {
             return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                    window.innerWidth <= 768;
         }
 
+        // Hanya deteksi di Desktop (lebih aman)
         function detectDevTools() {
-            // SKIP deteksi saat fullscreen di mobile
-            if (isFullscreen() && isMobile()) {
-                return;
-            }
+            if (isMobile()) return; // Nonaktif total di mobile
 
             const widthDiff = window.outerWidth - window.innerWidth;
             const heightDiff = window.outerHeight - window.innerHeight;
 
-            const threshold = isMobile() ? DEVTOOLS_CONFIG.mobileThreshold : DEVTOOLS_CONFIG.desktopThreshold;
-
-            const isDevToolsDetected = 
-                widthDiff > threshold || 
-                heightDiff > threshold ||
-                (widthDiff > 50 && heightDiff > 50);
-
-            if (isDevToolsDetected && !devToolsOpen) {
+            if ((widthDiff > 160 || heightDiff > 160) && !devToolsOpen) {
                 devToolsOpen = true;
                 document.body.innerHTML = `
                     <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
@@ -150,71 +126,39 @@
                         </div>
                     </div>`;
                 setTimeout(() => window.location.href = 'about:blank', 800);
-            } else if (!isDevToolsDetected) {
-                devToolsOpen = false;
             }
         }
 
-        function isBlockedKey(e) {
-            const shortcuts = [
-                { key: 'F12', code: 123 },
-                { key: 'I', modifiers: ['ctrl', 'shift'] },
-                { key: 'J', modifiers: ['ctrl', 'shift'] },
-                { key: 'C', modifiers: ['ctrl', 'shift'] },
-                { key: 'U', modifiers: ['ctrl'] },
-                { key: 'I', modifiers: ['meta', 'alt'] },
-                { key: 'J', modifiers: ['meta', 'alt'] },
-                { key: 'C', modifiers: ['meta', 'alt'] },
-                { key: 'U', modifiers: ['meta'] }
+        // Block shortcut keys (F12, Ctrl+Shift+I, dll)
+        function blockDevToolsKeys(e) {
+            const blocked = [
+                e.key === 'F12' || e.keyCode === 123,
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
+                (e.ctrlKey && e.key === 'U') || (e.metaKey && e.key === 'U')
             ];
 
-            return shortcuts.some(s => {
-                if (e.key === s.key || e.keyCode === s.code) {
-                    if (!s.modifiers) return true;
-                    return s.modifiers.every(mod => {
-                        if (mod === 'ctrl') return e.ctrlKey;
-                        if (mod === 'shift') return e.shiftKey;
-                        if (mod === 'meta') return e.metaKey;
-                        if (mod === 'alt') return e.altKey;
-                        return false;
-                    });
-                }
-                return false;
-            });
-        }
-
-        function blockDevToolsKeys(e) {
-            if (isBlockedKey(e)) {
+            if (blocked.some(Boolean)) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 return false;
             }
         }
 
-        // Event Listeners
+        // Event listeners
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', blockDevToolsKeys, true);
         window.addEventListener('keydown', blockDevToolsKeys, true);
 
-        // Deteksi DevTools
-        setInterval(detectDevTools, DEVTOOLS_CONFIG.checkInterval);
-
-        // Reset flag saat fullscreen berubah
-        ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'].forEach(ev => {
-            document.addEventListener(ev, () => {
-                if (isFullscreen()) devToolsOpen = false;
-            });
-        });
+        // Jalankan deteksi hanya di desktop
+        if (!isMobile()) {
+            setInterval(detectDevTools, 500);
+        }
     </script>
 
-    <!-- Script Utama Replay -->
+    <!-- Script Replay -->
     <script>
-        const state = {
-            allReplays: [],
-            filteredReplays: [],
-            currentReplay: null
-        };
-      
+        const state = { allReplays: [], filteredReplays: [], currentReplay: null };
         let shouldAutoPlay = true;
         let isUserPaused = false;
 
@@ -237,17 +181,12 @@
         function formatDate(dateString) {
             if (!dateString) return "—";
             try {
-                return new Intl.DateTimeFormat("id-ID", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric"
-                }).format(new Date(dateString));
+                return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dateString));
             } catch { return dateString; }
         }
 
         function toggleOverlay(show) {
-            if (show) elements.playerOverlay.classList.remove("hidden");
-            else elements.playerOverlay.classList.add("hidden");
+            show ? elements.playerOverlay.classList.remove("hidden") : elements.playerOverlay.classList.add("hidden");
         }
 
         function forcePlay(player) {
@@ -261,7 +200,6 @@
             elements.replayTitle.textContent = replay.judul || "Tanpa Judul";
             elements.replayDate.textContent = formatDate(replay.tanggal);
             elements.replayPlayer.src = getYouTubeSrc(replay.videoId);
-           
             isUserPaused = false;
             shouldAutoPlay = true;
             toggleOverlay(true);
@@ -269,49 +207,31 @@
 
         function init() {
             state.allReplays = [
-                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "Ugr4X9Zzq4A" }
+                { id: "1", judul: "Arena Replay", tanggal: "2026-03-29", videoId: "4ZcC3Isf06w" }
             ];
             state.filteredReplays = [...state.allReplays];
-           
             if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
 
             const player = elements.replayPlayer;
 
-            player.addEventListener("play", () => {
-                toggleOverlay(false);
-                isUserPaused = false;
-            });
-            player.addEventListener("pause", () => {
-                toggleOverlay(true);
-                if (!isUserPaused) forcePlay(player);
-            });
-            player.addEventListener("ended", () => {
-                toggleOverlay(true);
-                shouldAutoPlay = false;
-                isUserPaused = false;
-            });
+            player.addEventListener("play", () => { toggleOverlay(false); isUserPaused = false; });
+            player.addEventListener("pause", () => { toggleOverlay(true); if (!isUserPaused) forcePlay(player); });
+            player.addEventListener("ended", () => { toggleOverlay(true); shouldAutoPlay = false; });
             player.addEventListener("waiting", () => forcePlay(player));
             player.addEventListener("canplay", () => forcePlay(player));
             player.addEventListener("seeked", () => forcePlay(player));
-            player.addEventListener("fullscreenchange", () => forcePlay(player));
 
             elements.playerStage.addEventListener("click", (e) => {
                 if (e.target.closest("#overlayPlayButton")) return;
                 if (player.paused) {
-                    isUserPaused = false;
-                    shouldAutoPlay = true;
-                    player.play().catch(() => {});
+                    isUserPaused = false; shouldAutoPlay = true; player.play().catch(() => {});
                 } else {
-                    isUserPaused = true;
-                    shouldAutoPlay = false;
-                    player.pause();
+                    isUserPaused = true; shouldAutoPlay = false; player.pause();
                 }
             });
 
             elements.overlayPlayButton.addEventListener("click", () => {
-                isUserPaused = false;
-                shouldAutoPlay = true;
-                player.play().catch(() => {});
+                isUserPaused = false; shouldAutoPlay = true; player.play().catch(() => {});
             });
         }
 
