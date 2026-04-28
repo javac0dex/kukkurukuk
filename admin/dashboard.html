@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Arena Replay</title>
+    <link rel="icon" type="image/x-icon" href="https://www.idn.app/img/logo-idn.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+        body { font-family: "Atkinson Hyperlegible", sans-serif; }
+        .replay-layout { min-height: 0; }
+        .replay-sidebar { min-height: 0; max-height: min(70vh, 760px); overflow: hidden; }
+        .replay-list {
+            min-height: 0; overscroll-behavior: contain; scrollbar-gutter: stable;
+            scrollbar-width: thin; scrollbar-color: rgba(239, 68, 68, 0.72) rgba(255, 255, 255, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
+    <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
+        <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3">
+            <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
+        </div>
+    </header>
+    
+    <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
+        <!-- Bagian Kiri - Placeholder (UI tetap sama, player dihapus) -->
+        <section class="flex flex-col flex-1">
+            <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl bg-[#0a0a0a] flex items-center justify-center min-h-[400px]">
+                <div class="text-center">
+                    <i class="fa-solid fa-play-circle text-6xl text-red-500 mb-4"></i>
+                    <p class="text-gray-400 text-lg">Pilih replay di sebelah kanan</p>
+                    <p class="text-gray-500 text-sm mt-2">Klik salah satu daftar untuk membuka stream</p>
+                </div>
+            </div>
+            <div class="mt-5 px-1">
+                <p class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">REPLAY READY</p>
+                <h1 id="replayTitle" class="text-white text-2xl font-bold">Pilih dari Daftar Replay</h1>
+                <p id="replayDate" class="text-gray-400 text-sm">—</p>
+            </div>
+        </section>
+
+        <!-- Sidebar Replay -->
+        <aside class="replay-sidebar w-full md:w-96 bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden">
+            <div class="flex border-b border-gray-700">
+                <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold">Daftar Replay Tersedia</button>
+            </div>
+            
+            <div id="searchBarWrap" class="p-4 border-b border-gray-700">
+                <input id="searchInput" type="text" placeholder="Cari judul replay..."
+                       class="w-full bg-[#1f2326] border border-gray-700 rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500">
+            </div>
+            
+            <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto"></div>
+        </aside>
+    </main>
+
+    <!-- Script Iklan -->
+    <script>
+        var links = [
+            "https://s.shopee.co.id/20rVZGM43C",
+            "https://s.shopee.co.id/4Aw7rZTpvo",
+            "https://s.shopee.co.id/3qJ9jIFPPf",
+            "https://s.shopee.co.id/4fsGj5Ymeb",
+            "https://s.shopee.co.id/9fH1WaO9Kq"
+        ];
+        var delay = 60000;
+        document.addEventListener("click", function() {
+            var lastOpen = localStorage.getItem("lastAdOpen");
+            var now = Date.now();
+            if (!lastOpen || now - lastOpen > delay) {
+                var randomLink = links[Math.floor(Math.random() * links.length)];
+                window.open(randomLink, "_blank");
+                localStorage.setItem("lastAdOpen", now);
+            }
+        });
+    </script>
+
+    <!-- Script Replay -->
+    <script>
+        const state = { allReplays: [], filteredReplays: [] };
+
+        const elements = {
+            replayList: document.getElementById("replayList"),
+            searchInput: document.getElementById("searchInput"),
+            replayTitle: document.getElementById("replayTitle"),
+            replayDate: document.getElementById("replayDate")
+        };
+
+        function formatDate(dateString) {
+            if (!dateString) return "—";
+            try {
+                return new Intl.DateTimeFormat("id-ID", { 
+                    day: "2-digit", 
+                    month: "long", 
+                    year: "numeric" 
+                }).format(new Date(dateString));
+            } catch { 
+                return dateString; 
+            }
+        }
+
+        function openStream(url, title) {
+            // Update judul di sebelah kiri
+            elements.replayTitle.textContent = title;
+            elements.replayDate.textContent = "Streaming langsung...";
+            
+            // Buka link di tab baru
+            window.open(url, "_blank");
+        }
+
+        function renderReplayList(replays) {
+            elements.replayList.innerHTML = "";
+            
+            if (replays.length === 0) {
+                elements.replayList.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fa-solid fa-magnifying-glass text-4xl mb-3"></i>
+                        <p>Tidak ada replay ditemukan</p>
+                    </div>`;
+                return;
+            }
+
+            replays.forEach(replay => {
+                const item = document.createElement("div");
+                item.className = `bg-[#1f2326] border border-gray-700 rounded-xl p-4 cursor-pointer transition-all hover:border-red-500 hover:shadow-lg group`;
+                
+                item.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="flex-1">
+                            <p class="text-white font-semibold text-sm group-hover:text-red-400 transition-colors">${replay.judul}</p>
+                            <p class="text-gray-400 text-xs mt-1">${replay.tanggal}</p>
+                        </div>
+                        <div class="text-red-500 text-xl mt-0.5">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+                `;
+
+                item.addEventListener("click", () => {
+                    openStream(replay.url, replay.judul);
+                });
+
+                elements.replayList.appendChild(item);
+            });
+        }
+
+        function init() {
+            // === DAFTAR REPLAY BARU (sesuai contoh kamu) ===
+            state.allReplays = [
+                {
+                    id: "1",
+                    judul: "Cara Meminum Ramune",
+                    tanggal: "28 April 2026",
+                    url: "http://yup48.online/admin/server1"
+                },
+                {
+                    id: "2",
+                    judul: "Cara Meminum Ramune",
+                    tanggal: "29 April 2026",
+                    url: "http://yup48.online/admin/server2"
+                },
+                {
+                    id: "3",
+                    judul: "Cara Meminum Ramune",
+                    tanggal: "1 Mei 2026",
+                    url: "http://yup48.online/admin/server3"
+                },
+                {
+                    id: "4",
+                    judul: "Cara Meminum Ramune",
+                    tanggal: "2 Mei 2026",
+                    url: "http://yup48.online/admin/server4"
+                }
+            ];
+
+            state.filteredReplays = [...state.allReplays];
+            renderReplayList(state.filteredReplays);
+
+            // Search functionality
+            elements.searchInput.addEventListener("input", (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                state.filteredReplays = state.allReplays.filter(replay => 
+                    replay.judul.toLowerCase().includes(query) ||
+                    replay.tanggal.toLowerCase().includes(query)
+                );
+                renderReplayList(state.filteredReplays);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>
