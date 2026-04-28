@@ -26,18 +26,15 @@
     </header>
     
     <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
-        <!-- Bagian Kiri - Placeholder (UI tetap sama, player dihapus) -->
+        <!-- Bagian Kiri (Player Area) - Dibersihkan -->
         <section class="flex flex-col flex-1">
-            <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl bg-[#0a0a0a] flex items-center justify-center min-h-[400px]">
-                <div class="text-center">
-                    <i class="fa-solid fa-play-circle text-6xl text-red-500 mb-4"></i>
-                    <p class="text-gray-400 text-lg">Pilih replay di sebelah kanan</p>
-                    <p class="text-gray-500 text-sm mt-2">Klik salah satu daftar untuk membuka stream</p>
-                </div>
+            <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl bg-[#0a0a0a] h-[420px] flex items-center justify-center">
+                <!-- Kosong / Hitam polos -->
             </div>
+            
             <div class="mt-5 px-1">
-                <p class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">REPLAY READY</p>
-                <h1 id="replayTitle" class="text-white text-2xl font-bold">Pilih dari Daftar Replay</h1>
+                <p id="playerStatus" class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">REPLAY READY</p>
+                <h1 id="replayTitle" class="text-white text-2xl font-bold">Pilih Replay</h1>
                 <p id="replayDate" class="text-gray-400 text-sm">—</p>
             </div>
         </section>
@@ -86,28 +83,18 @@
             replayList: document.getElementById("replayList"),
             searchInput: document.getElementById("searchInput"),
             replayTitle: document.getElementById("replayTitle"),
-            replayDate: document.getElementById("replayDate")
+            replayDate: document.getElementById("replayDate"),
+            playerStatus: document.getElementById("playerStatus")
         };
 
         function formatDate(dateString) {
-            if (!dateString) return "—";
-            try {
-                return new Intl.DateTimeFormat("id-ID", { 
-                    day: "2-digit", 
-                    month: "long", 
-                    year: "numeric" 
-                }).format(new Date(dateString));
-            } catch { 
-                return dateString; 
-            }
+            return dateString || "—";
         }
 
-        function openStream(url, title) {
-            // Update judul di sebelah kiri
+        function openStream(url, title, date) {
             elements.replayTitle.textContent = title;
-            elements.replayDate.textContent = "Streaming langsung...";
-            
-            // Buka link di tab baru
+            elements.replayDate.textContent = date;
+            elements.playerStatus.textContent = "STREAMING";
             window.open(url, "_blank");
         }
 
@@ -117,7 +104,6 @@
             if (replays.length === 0) {
                 elements.replayList.innerHTML = `
                     <div class="text-center py-12 text-gray-500">
-                        <i class="fa-solid fa-magnifying-glass text-4xl mb-3"></i>
                         <p>Tidak ada replay ditemukan</p>
                     </div>`;
                 return;
@@ -130,17 +116,17 @@
                 item.innerHTML = `
                     <div class="flex items-start gap-3">
                         <div class="flex-1">
-                            <p class="text-white font-semibold text-sm group-hover:text-red-400 transition-colors">${replay.judul}</p>
+                            <p class="text-white font-semibold text-sm group-hover:text-red-400">${replay.judul}</p>
                             <p class="text-gray-400 text-xs mt-1">${replay.tanggal}</p>
                         </div>
-                        <div class="text-red-500 text-xl mt-0.5">
+                        <div class="text-red-500 text-xl mt-1">
                             <i class="fa-solid fa-arrow-right"></i>
                         </div>
                     </div>
                 `;
 
                 item.addEventListener("click", () => {
-                    openStream(replay.url, replay.judul);
+                    openStream(replay.url, replay.judul, replay.tanggal);
                 });
 
                 elements.replayList.appendChild(item);
@@ -148,42 +134,20 @@
         }
 
         function init() {
-            // === DAFTAR REPLAY BARU (sesuai contoh kamu) ===
             state.allReplays = [
-                {
-                    id: "1",
-                    judul: "Cara Meminum Ramune",
-                    tanggal: "28 April 2026",
-                    url: "http://yup48.online/admin/server1"
-                },
-                {
-                    id: "2",
-                    judul: "Cara Meminum Ramune",
-                    tanggal: "29 April 2026",
-                    url: "http://yup48.online/admin/server2"
-                },
-                {
-                    id: "3",
-                    judul: "Cara Meminum Ramune",
-                    tanggal: "1 Mei 2026",
-                    url: "http://yup48.online/admin/server3"
-                },
-                {
-                    id: "4",
-                    judul: "Cara Meminum Ramune",
-                    tanggal: "2 Mei 2026",
-                    url: "http://yup48.online/admin/server4"
-                }
+                { id: "1", judul: "Cara Meminum Ramune", tanggal: "28 April 2026", url: "http://yup48.online/admin/server1" },
+                { id: "2", judul: "Cara Meminum Ramune", tanggal: "29 April 2026", url: "http://yup48.online/admin/server2" },
+                { id: "3", judul: "Cara Meminum Ramune", tanggal: "1 Mei 2026", url: "http://yup48.online/admin/server3" },
+                { id: "4", judul: "Cara Meminum Ramune", tanggal: "2 Mei 2026", url: "http://yup48.online/admin/server4" }
             ];
 
             state.filteredReplays = [...state.allReplays];
             renderReplayList(state.filteredReplays);
 
-            // Search functionality
             elements.searchInput.addEventListener("input", (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 state.filteredReplays = state.allReplays.filter(replay => 
-                    replay.judul.toLowerCase().includes(query) ||
+                    replay.judul.toLowerCase().includes(query) || 
                     replay.tanggal.toLowerCase().includes(query)
                 );
                 renderReplayList(state.filteredReplays);
