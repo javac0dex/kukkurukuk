@@ -10,8 +10,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
         body { font-family: "Atkinson Hyperlegible", sans-serif; }
-        .replay-layout { min-height: 0; }
-        .replay-sidebar { min-height: 0; max-height: min(70vh, 760px); overflow: hidden; }
         .replay-list {
             min-height: 0; overscroll-behavior: contain; scrollbar-gutter: stable;
             scrollbar-width: thin; scrollbar-color: rgba(239, 68, 68, 0.72) rgba(255, 255, 255, 0.06);
@@ -25,33 +23,22 @@
         </div>
     </header>
     
-    <main class="replay-layout flex flex-col md:flex-row flex-grow max-w-7xl mx-auto w-full gap-4 p-4">
-        <!-- Bagian Kiri (Player Area) - Dibersihkan -->
-        <section class="flex flex-col flex-1">
-            <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl bg-[#0a0a0a] h-[420px] flex items-center justify-center">
-                <!-- Kosong / Hitam polos -->
-            </div>
-            
-            <div class="mt-5 px-1">
-                <p id="playerStatus" class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">REPLAY READY</p>
-                <h1 id="replayTitle" class="text-white text-2xl font-bold">Pilih Replay</h1>
-                <p id="replayDate" class="text-gray-400 text-sm">—</p>
-            </div>
-        </section>
-
-        <!-- Sidebar Replay -->
-        <aside class="replay-sidebar w-full md:w-96 bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden">
+    <main class="max-w-4xl mx-auto w-full p-4">
+        <!-- Sidebar Replay - Sekarang jadi konten utama -->
+        <div class="bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden shadow-2xl">
             <div class="flex border-b border-gray-700">
-                <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold">Daftar Replay Tersedia</button>
+                <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold text-lg">
+                    Daftar Replay Tersedia
+                </button>
             </div>
             
-            <div id="searchBarWrap" class="p-4 border-b border-gray-700">
+            <div class="p-4 border-b border-gray-700">
                 <input id="searchInput" type="text" placeholder="Cari judul replay..."
                        class="w-full bg-[#1f2326] border border-gray-700 rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500">
             </div>
             
-            <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto"></div>
-        </aside>
+            <div id="replayList" class="replay-list flex-1 p-4 space-y-3 overflow-auto min-h-[70vh]"></div>
+        </div>
     </main>
 
     <!-- Script Iklan -->
@@ -81,20 +68,11 @@
 
         const elements = {
             replayList: document.getElementById("replayList"),
-            searchInput: document.getElementById("searchInput"),
-            replayTitle: document.getElementById("replayTitle"),
-            replayDate: document.getElementById("replayDate"),
-            playerStatus: document.getElementById("playerStatus")
+            searchInput: document.getElementById("searchInput")
         };
 
-        function formatDate(dateString) {
-            return dateString || "—";
-        }
-
-        function openStream(url, title, date) {
-            elements.replayTitle.textContent = title;
-            elements.replayDate.textContent = date;
-            elements.playerStatus.textContent = "STREAMING";
+        function openStream(url, title) {
+            elements.replayTitle = title; // untuk referensi saja
             window.open(url, "_blank");
         }
 
@@ -116,19 +94,16 @@
                 item.innerHTML = `
                     <div class="flex items-start gap-3">
                         <div class="flex-1">
-                            <p class="text-white font-semibold text-sm group-hover:text-red-400">${replay.judul}</p>
-                            <p class="text-gray-400 text-xs mt-1">${replay.tanggal}</p>
+                            <p class="text-white font-semibold text-base group-hover:text-red-400 transition-colors">${replay.judul}</p>
+                            <p class="text-gray-400 text-sm mt-1">${replay.tanggal}</p>
                         </div>
-                        <div class="text-red-500 text-xl mt-1">
+                        <div class="text-red-500 text-2xl mt-1">
                             <i class="fa-solid fa-arrow-right"></i>
                         </div>
                     </div>
                 `;
 
-                item.addEventListener("click", () => {
-                    openStream(replay.url, replay.judul, replay.tanggal);
-                });
-
+                item.addEventListener("click", () => openStream(replay.url, replay.judul));
                 elements.replayList.appendChild(item);
             });
         }
@@ -144,6 +119,7 @@
             state.filteredReplays = [...state.allReplays];
             renderReplayList(state.filteredReplays);
 
+            // Search
             elements.searchInput.addEventListener("input", (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 state.filteredReplays = state.allReplays.filter(replay => 
