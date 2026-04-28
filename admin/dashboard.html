@@ -17,14 +17,29 @@
     </style>
 </head>
 <body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen font-sans">
-    <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
-        <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3">
-            <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
+    <!-- Header Baru -->
+    <header class="bg-[#1f2326] border-b border-gray-700 sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo IDN LIVE -->
+            <div class="flex items-center gap-2">
+                <span class="text-red-500 font-bold text-2xl tracking-tighter">IDN</span>
+                <div class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none flex items-center">
+                    LIVE
+                </div>
+            </div>
+            
+            <!-- Judul di Tengah -->
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block">
+                <h1 class="text-white text-xl font-bold tracking-wide">Arena Replay</h1>
+            </div>
+            
+            <!-- Kosong di kanan (bisa ditambah tombol nanti) -->
+            <div></div>
         </div>
     </header>
     
     <main class="max-w-4xl mx-auto w-full p-4">
-        <!-- Sidebar Replay - Sekarang jadi konten utama -->
+        <!-- Daftar Replay -->
         <div class="bg-[#2c2e31] rounded-3xl flex flex-col overflow-hidden shadow-2xl">
             <div class="flex border-b border-gray-700">
                 <button class="flex-1 py-4 text-center border-b-2 border-red-600 font-semibold text-lg">
@@ -72,7 +87,6 @@
         };
 
         function openStream(url, title) {
-            elements.replayTitle = title; // untuk referensi saja
             window.open(url, "_blank");
         }
 
@@ -119,7 +133,6 @@
             state.filteredReplays = [...state.allReplays];
             renderReplayList(state.filteredReplays);
 
-            // Search
             elements.searchInput.addEventListener("input", (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 state.filteredReplays = state.allReplays.filter(replay => 
