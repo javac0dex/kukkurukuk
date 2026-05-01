@@ -27,7 +27,6 @@
         }
         .overlay-play:hover { transform: scale(1.08); background: rgba(220,38,38,0.98); }
         
-        /* Area Iklan */
         .iklan-box {
             background: #2c2e31;
             border: 2px dashed #f97316;
@@ -74,22 +73,20 @@
             <p id="replayDate" class="text-gray-400 text-sm">29 Maret 2026</p>
         </div>
 
-        <!-- ==================== AREA IKLAN ==================== -->
         <div class="iklan-box">
             <p class="text-orange-400 text-lg">❤️ PASANG IKLAN DISINI ❤️</p>
             <p class="mt-2 text-sm text-gray-300">
                 Kami tidak menerima promosi judi online atau konten 18+<br>
                 Iklan bisa hubungi: +62 XXX-XXX-XXX
             </p>
-            <!-- Kamu bisa tambah link di sini -->
-            <!-- <a href="https://s.shopee.co.id/..." class="text-blue-400 underline">Klik Link Shopee</a> -->
+            
         </div>
-        <!-- ==================================================== -->
+
     </main>
 
     <script type="module" src="https://cdn.vidstack.io/player"></script>
 
-    <!-- Script Iklan (tetap aktif) -->
+   
     <script>
         var links = [
             "https://s.shopee.co.id/20rVZGM43C",
@@ -110,18 +107,18 @@
         });
     </script>
 
-   <!-- Anti DevTools (Khusus Desktop Saja) -->
+  
     <script>
         function isMobile() {
             return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                    window.innerWidth <= 768;
         }
 
-        // HANYA JALANKAN ANTI DEVTOOLS DI DESKTOP
+        
         if (!isMobile()) {
             let devToolsOpen = false;
 
-            // Deteksi ukuran window
+            
             function detectDevTools() {
                 const widthDiff = window.outerWidth - window.innerWidth;
                 const heightDiff = window.outerHeight - window.innerHeight;
@@ -139,7 +136,7 @@
                 }
             }
 
-            // Block shortcut keys (F12, Ctrl+Shift+I, dll)
+           
             function blockDevToolsKeys(e) {
                 const blocked = [
                     e.key === 'F12' || e.keyCode === 123,
@@ -155,17 +152,17 @@
                 }
             }
 
-            // Event listeners - HANYA DI DESKTOP
+           
             document.addEventListener('contextmenu', e => e.preventDefault());
             document.addEventListener('keydown', blockDevToolsKeys, true);
             window.addEventListener('keydown', blockDevToolsKeys, true);
 
-            // Jalankan deteksi setiap 500ms
+           
             setInterval(detectDevTools, 500);
         }
     </script>
 
-    <!-- Script Replay -->
+   
     <script>
         const state = { allReplays: [], filteredReplays: [], currentReplay: null };
         let shouldAutoPlay = true;
