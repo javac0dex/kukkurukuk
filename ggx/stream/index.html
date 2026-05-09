@@ -1,378 +1,349 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGX777 - Streaming Bola Live</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        @keyframes float-ball {
-            0%, 100% { transform: translateX(0) translateY(0); }
-            25% { transform: translateX(80px) translateY(-60px); }
-            50% { transform: translateX(150px) translateY(0); }
-            75% { transform: translateX(80px) translateY(60px); }
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HLS Live Player</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.7/hls.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-        @keyframes rotate-ball {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    :root {
+      --bg: #080c14;
+      --surface: #0e1420;
+      --border: #1c2438;
+      --accent: #00e5ff;
+      --accent2: #ff3d71;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --active: #00e5ff;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      background-image:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0,229,255,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 80% 90%, rgba(255,61,113,0.05) 0%, transparent 60%);
+    }
 
-        body::before {
-            content: '';
-            position: fixed;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent);
-            border: 3px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            top: 10%;
-            left: 5%;
-            animation: float-ball 15s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
+    header {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
 
-        body::after {
-            content: '';
-            position: fixed;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent);
-            border: 2px solid rgba(255,255,255,0.08);
-            border-radius: 50%;
-            bottom: 15%;
-            right: 8%;
-            animation: float-ball 18s ease-in-out infinite reverse;
-            pointer-events: none;
-            z-index: 0;
-        }
+    .live-dot {
+      width: 10px; height: 10px;
+      background: var(--accent2);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent2);
+      animation: pulse 1.4s infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
 
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    header h1 span { color: var(--accent); }
 
-        header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
+    .badge {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
 
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
+    .player-wrap {
+      width: 100%;
+      max-width: 860px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 0 1px rgba(0,229,255,0.05), 0 24px 60px rgba(0,0,0,0.6);
+      background: #000;
+      position: relative;
+    }
 
-        header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
+    video {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16/9;
+      background: #000;
+    }
 
-        .player-wrapper {
-            background: #000;
-            position: relative;
-            padding-top: 56.25%;
-            overflow: hidden;
-        }
+    .server-bar {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
 
-        video {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
+    .server-btn {
+      flex: 1;
+      min-width: 120px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .server-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,229,255,0.07), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .server-btn:hover::before { opacity: 1; }
+    .server-btn:hover {
+      border-color: rgba(0,229,255,0.3);
+      color: var(--text);
+    }
+    .server-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 12px rgba(0,229,255,0.15);
+    }
+    .server-btn.active::before { opacity: 1; }
 
-        .controls {
-            padding: 30px;
-            background: #f8f9fa;
-        }
+    .server-btn .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .server-btn.active .dot {
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
+    .status-bar {
+      width: 100%;
+      max-width: 860px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
 
-        .stream-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+    #status-text {
+      color: var(--accent);
+      transition: color 0.3s;
+    }
+    #status-text.error { color: var(--accent2); }
 
-        button {
-            flex: 1;
-            min-width: 150px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .sep { opacity: 0.3; }
 
-        .btn-play {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-        }
+    #quality-label {
+      margin-left: auto;
+      color: var(--muted);
+    }
 
-        .btn-play:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
-        }
+    /* loading overlay */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(8,12,20,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .loading-overlay.show { opacity: 1; pointer-events: all; }
 
-        .btn-pause {
-            background: #6c757d;
-            color: white;
-        }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .btn-pause:hover {
-            background: #5a6268;
-        }
-
-        .btn-fullscreen {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-fullscreen:hover {
-            background: #218838;
-        }
-
-        .btn-refresh {
-            background: #ff9800;
-            color: white;
-        }
-
-        .btn-refresh:hover {
-            background: #e68900;
-        }
-
-        .btn-stream {
-            background: #2196F3;
-            color: white;
-            flex: 0 1 auto;
-        }
-
-        .btn-stream:hover {
-            background: #0b7dda;
-        }
-
-        .btn-stream.active {
-            background: #ff6b6b;
-        }
-
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            color: #666;
-            font-size: 0.95em;
-        }
-
-        .status.loading {
-            color: #ff9800;
-        }
-
-        .status.error {
-            color: #f44336;
-        }
-
-        .status.playing {
-            color: #4caf50;
-        }
-
-        footer {
-            background: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-            color: #999;
-            font-size: 0.9em;
-            border-top: 1px solid #ddd;
-        }
-
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8em;
-            }
-
-            .controls {
-                padding: 20px;
-            }
-
-            button {
-                min-width: 100px;
-                padding: 10px 15px;
-                font-size: 0.9em;
-            }
-        }
-    </style>
+    .loading-overlay p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>⚽ GGX777</h1>
-            <p>Pilih Stream klik refresh</p>
-        </header>
 
-        <div class="player-wrapper">
-            <video id="videoPlayer" controls></video>
-        </div>
+<header>
+  <div class="live-dot"></div>
+  <h1>HLS <span>Live</span> Player</h1>
+  <div class="badge">● LIVE</div>
+</header>
 
-        <div class="controls">
-            <div class="button-group">
-                <button class="btn-play" onclick="playStream()">▶ Putar Stream</button>
-                <button class="btn-pause" onclick="pauseStream()">⏸ Hentikan</button>
-                <button class="btn-refresh" onclick="refreshStream()">🔄 Refresh</button>
-                <button class="btn-fullscreen" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-            </div>
+<div class="player-wrap">
+  <video id="video" controls autoplay playsinline muted></video>
+  <div class="loading-overlay" id="overlay">
+    <div class="spinner"></div>
+    <p>Menghubungkan ke server...</p>
+  </div>
+</div>
 
-            <div class="stream-group">
-                <button class="btn-stream active" id="stream1-btn" onclick="switchStream(1)">Stream 1</button>
-                <button class="btn-stream" id="stream2-btn" onclick="switchStream(2)">Stream 2</button>
-                <button class="btn-stream" id="stream3-btn" onclick="switchStream(3)">Stream 3</button>
-            </div>
+<div class="server-bar">
+  <button class="server-btn active" onclick="switchServer(0)">
+    <div class="dot"></div> Server 1
+  </button>
+  <button class="server-btn" onclick="switchServer(1)">
+    <div class="dot"></div> Server 2
+  </button>
+  <button class="server-btn" onclick="switchServer(2)">
+    <div class="dot"></div> Server 3
+  </button>
+</div>
 
-            <div class="status" id="status">
-                Status: Siap untuk diputar
-            </div>
-        </div>
+<div class="status-bar">
+  <span id="status-text">Memuat...</span>
+  <span class="sep">|</span>
+  <span id="server-label">Server 1</span>
+  <span id="quality-label">—</span>
+</div>
 
-        <footer>
-            <p>GGX777 © 1990</p>
-        </footer>
-    </div>
+<script>
+  const sources = [
+    "https://pop12-ec1-ateme.tv360.vn/tok_eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNzc4MzcxNjIwIiwic2lwIjoiIiwicGF0aCI6Ii9saXZlL2Vkcy80NTAvSExTX0NsZWFuX01ITF8ycy8iLCJzZXNzaW9uX2Nkbl9pZCI6IjcyYzBkYjJlMjI4OGU5MjIiLCJzZXNzaW9uX2lkIjoiIiwiY2xpZW50X2lkIjoiIiwiZGV2aWNlX2lkIjoiIiwibWF4X3Nlc3Npb25zIjowLCJzZXNzaW9uX2R1cmF0aW9uIjowLCJ1cmwiOiJodHRwczovLzE3Mi4yNC4xNzMuMTk2Iiwic2Vzc2lvbl90aW1lb3V0IjowLCJhdWQiOiIzNCIsInNvdXJjZXMiOls0OTVdfQ==.e-G0wKr2ugYoP7e6pjENUCiUKsgA337Rq7wjYE32UemDPhuS6L3283wH4zu_LJcAg3oA7dezReo0Z2n3mUqpCw==/live/eds/450/HLS_Clean_MHL_2s/index.m3u8?screen=MHL&uid=245524969",
+    "https://pop12-ec1-ateme.tv360.vn/tok_eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNzc4MzcxNjAwIiwic2lwIjoiIiwicGF0aCI6Ii9saXZlL2Vkcy80NTAvSExTX0NsZWFuX01ITF8ycy8iLCJzZXNzaW9uX2Nkbl9pZCI6IjA5YTU3MjA3NjViOWJjNWEiLCJzZXNzaW9uX2lkIjoiIiwiY2xpZW50X2lkIjoiIiwiZGV2aWNlX2lkIjoiIiwibWF4X3Nlc3Npb25zIjowLCJzZXNzaW9uX2R1cmF0aW9uIjowLCJ1cmwiOiJodHRwczovLzE3Mi4yNC4xNzMuMTk2Iiwic2Vzc2lvbl90aW1lb3V0IjowLCJhdWQiOiIzNCIsInNvdXJjZXMiOls0OTVdfQ==.kFw8SPz8VsWhyQt2lyRZoTaW8oYs5cfUaCeS8SC6Z03ltEnIPOk6b4iQdJg_IYIcXR5L32mEoLl_NAANFSKoIw==/live/eds/450/HLS_Clean_MHL_2s/index.m3u8?screen=MHL&uid=245524969",
+    "https://pop12-ec1-ateme.tv360.vn/tok_eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNzc4MzcxNjQ1Iiwic2lwIjoiIiwicGF0aCI6Ii9saXZlL2Vkcy80NTAvSExTX0NsZWFuX01ITF8ycy8iLCJzZXNzaW9uX2Nkbl9pZCI6ImFjZTgzNmRlMDkxZGZhMzUiLCJzZXNzaW9uX2lkIjoiIiwiY2xpZW50X2lkIjoiIiwiZGV2aWNlX2lkIjoiIiwibWF4X3Nlc3Npb25zIjowLCJzZXNzaW9uX2R1cmF0aW9uIjowLCJ1cmwiOiJodHRwczovLzE3Mi4yNC4xNzMuMTk2Iiwic2Vzc2lvbl90aW1lb3V0IjowLCJhdWQiOiIzNCIsInNvdXJjZXMiOls0OTVdfQ==.Ky69EzsNvgv9xuN9tR8AQvYcglEOqOKvE07DlAh8I0yZHJ6qvtTuV-UYlf819bl1H-Qw9K4QTGzvwS-vyDKu4A==/live/eds/450/HLS_Clean_MHL_2s/index.m3u8?screen=MHL&uid=245524969"
+  ];
 
-    <script>
-        const video = document.getElementById('videoPlayer');
-        const statusDiv = document.getElementById('status');
-        
-        const streams = {
-            1: 'https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8',
-            2: 'https://pull-live4.fastestcdn-global.com/live/8443bf231dd3415698e9da3e7cf1b89e/index.m3u8',
-            3: 'https://tfum4grzdkpbqgrzdncjwfisg17ufgrz8yhuxgjtse5ucpf5gkmudp7so.100ycdn.com/live1.pro2cdnlive.com/live/channel15.m3u8?wsSecret=63caf844ea27c35dcd6ab8d3ee2a21ed&wsABSTime=1774914129&wsSession=d424f6325bb82699e831d7fd-177487588156583&wsIPSercert=d046e9fa0603f385e4fac0c21e93f7fa&wsBindIP=2&wsserid=1168215489703972116'
-        };
+  const video = document.getElementById('video');
+  const overlay = document.getElementById('overlay');
+  const statusText = document.getElementById('status-text');
+  const serverLabel = document.getElementById('server-label');
+  const qualityLabel = document.getElementById('quality-label');
+  const buttons = document.querySelectorAll('.server-btn');
 
-        let currentStream = 1;
-        let currentHls = null;
+  let hls = null;
+  let currentIndex = 0;
 
-        function updateStatus(message, type = '') {
-            statusDiv.textContent = message;
-            statusDiv.className = 'status ' + type;
+  function setStatus(msg, isError = false) {
+    statusText.textContent = msg;
+    statusText.className = isError ? 'error' : '';
+  }
+
+  function showLoading(show) {
+    overlay.className = 'loading-overlay' + (show ? ' show' : '');
+  }
+
+  function switchServer(index) {
+    if (index === currentIndex && hls) return;
+    currentIndex = index;
+
+    buttons.forEach((b, i) => b.classList.toggle('active', i === index));
+    serverLabel.textContent = `Server ${index + 1}`;
+    qualityLabel.textContent = '—';
+
+    loadSource(sources[index]);
+  }
+
+  function loadSource(url) {
+    showLoading(true);
+    setStatus('Menghubungkan...');
+
+    if (hls) { hls.destroy(); hls = null; }
+
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 90,
+      });
+
+      hls.loadSource(url);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        showLoading(false);
+        setStatus('Terhubung');
+        video.play().catch(() => {});
+      });
+
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
+        const level = hls.levels[data.level];
+        if (level) {
+          const res = level.height ? `${level.height}p` : '—';
+          const bw = level.bitrate ? ` · ${Math.round(level.bitrate/1000)}kbps` : '';
+          qualityLabel.textContent = res + bw;
         }
+      });
 
-        function updateStreamButtons() {
-            document.getElementById('stream1-btn').classList.remove('active');
-            document.getElementById('stream2-btn').classList.remove('active');
-            document.getElementById('stream3-btn').classList.remove('active');
-            document.getElementById('stream' + currentStream + '-btn').classList.add('active');
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          showLoading(true);
+          setStatus('Gagal memuat stream — coba server lain', true);
+          hls.destroy(); hls = null;
         }
+      });
 
-        function playStream() {
-            const streamUrl = streams[currentStream];
-            updateStatus('Status: Memuat stream...', 'loading');
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari native HLS
+      video.src = url;
+      video.addEventListener('loadedmetadata', () => {
+        showLoading(false);
+        setStatus('Terhubung (native HLS)');
+        video.play().catch(() => {});
+      }, { once: true });
+      video.addEventListener('error', () => {
+        setStatus('Error: stream tidak dapat dimuat', true);
+        showLoading(false);
+      }, { once: true });
+    } else {
+      setStatus('Browser tidak mendukung HLS', true);
+      showLoading(false);
+    }
+  }
 
-            if (Hls.isSupported()) {
-                if (currentHls) {
-                    currentHls.destroy();
-                }
-                currentHls = new Hls();
-                currentHls.loadSource(streamUrl);
-                currentHls.attachMedia(video);
+  // Autoplay server 1 on load
+  switchServer(0);
+</script>
 
-                currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    updateStatus('Status: Stream ' + currentStream + ' sedang diputar ✓', 'playing');
-                    video.play();
-                });
-
-                currentHls.on(Hls.Events.ERROR, function(event, data) {
-                    if (data.fatal) {
-                        updateStatus('⚠ Error: Stream tidak dapat diakses. Periksa koneksi Anda.', 'error');
-                    }
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari
-                video.src = streamUrl;
-                updateStatus('Status: Stream ' + currentStream + ' sedang diputar ✓', 'playing');
-                video.play();
-            } else {
-                updateStatus('⚠ Error: Browser Anda tidak mendukung streaming HLS', 'error');
-            }
-        }
-
-        function pauseStream() {
-            video.pause();
-            updateStatus('Status: Stream dijeda', '');
-        }
-
-        function refreshStream() {
-            updateStatus('Status: Refresh stream...', 'loading');
-            if (currentHls) {
-                currentHls.destroy();
-                currentHls = null;
-            }
-            video.src = '';
-            setTimeout(() => {
-                playStream();
-            }, 500);
-        }
-
-        function switchStream(streamNum) {
-            currentStream = streamNum;
-            updateStreamButtons();
-            updateStatus('Status: Mengganti ke Stream ' + streamNum + '...', 'loading');
-            if (video.paused) {
-                updateStatus('Status: Stream ' + streamNum + ' siap diputar', '');
-            } else {
-                playStream();
-            }
-        }
-
-        function toggleFullscreen() {
-            if (video.requestFullscreen) {
-                video.requestFullscreen();
-            } else if (video.webkitRequestFullscreen) {
-                video.webkitRequestFullscreen();
-            } else if (video.msRequestFullscreen) {
-                video.msRequestFullscreen();
-            }
-        }
-
-        // Auto-load stream on page load
-        window.addEventListener('load', function() {
-            updateStreamButtons();
-            updateStatus('Status: Siap untuk diputar', '');
-        });
-    </script>
 </body>
 </html>
