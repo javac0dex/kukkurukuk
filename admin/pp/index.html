@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jadwal Paid Promote — Mei 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --surface: #171717;
+    --surface2: #1f1f1f;
+    --border: #2a2a2a;
+    --border-light: #333;
+    --text-primary: #e8e8e8;
+    --text-secondary: #888;
+    --text-muted: #555;
+    --green: #3d7a52;
+    --green-glow: #4a9963;
+    --green-bg: #0d1f13;
+    --half-bg: #1a1a10;
+    --half-accent: #7a7a20;
+    --full-bg: #1a0d0d;
+    --full-accent: #7a2020;
+    --accent: #5a5a5a;
+    --mono: 'DM Mono', monospace;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    max-width: 900px;
+    margin: 0 auto 48px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .header-left .label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .header-left h1 {
+    font-family: var(--display);
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .header-left h1 span {
+    color: var(--green-glow);
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+  }
+
+  .month-nav button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .month-nav button:hover { background: var(--border); color: var(--text-primary); }
+
+  #monthLabel {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 110px;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    max-width: 900px;
+    margin: 0 auto 28px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot-free { background: var(--green-glow); }
+  .dot-half { background: var(--half-accent); }
+  .dot-full { background: var(--full-accent); }
+
+  /* ── CALENDAR ── */
+  .calendar-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .day-headers {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .day-header {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 8px 0;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .day-cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-height: 96px;
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .day-cell:hover { border-color: var(--border-light); background: var(--surface2); }
+  .day-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+  .day-cell.today { border-color: var(--accent); }
+
+  /* States */
+  .day-cell.state-free {
+    background: var(--green-bg);
+    border-color: var(--green);
+  }
+
+  .day-cell.state-free:hover { border-color: var(--green-glow); }
+
+  .day-cell.state-half {
+    background: var(--half-bg);
+    border-color: #3a3a10;
+  }
+
+  .day-cell.state-full {
+    background: var(--full-bg);
+    border-color: #3a1010;
+  }
+
+  .day-num {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .day-cell.state-free .day-num { color: var(--green-glow); }
+  .day-cell.state-half .day-num { color: #c0c060; }
+  .day-cell.state-full .day-num { color: #c06060; }
+  .day-cell.today .day-num::after {
+    content: '';
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+
+  .slot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .slot-item {
+    font-size: 9px;
+    color: var(--text-secondary);
+    background: var(--surface2);
+    border-radius: 3px;
+    padding: 2px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.03em;
+  }
+
+  .status-badge {
+    margin-top: 6px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .badge-free { background: #1a3326; color: var(--green-glow); }
+  .badge-half { background: #2a2a10; color: #b0b050; }
+  .badge-full { background: #2a1010; color: #c06060; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 28px;
+    width: 360px;
+    max-width: 90vw;
+  }
+
+  .modal-title {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .modal-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .slot-section { margin-bottom: 20px; }
+
+  .slot-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .slot-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+
+  .slot-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .slot-input:focus { border-color: var(--border-light); }
+  .slot-input::placeholder { color: var(--text-muted); }
+
+  .slot-clear {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    width: 28px; height: 34px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .slot-clear:hover { background: var(--full-bg); border-color: #7a2020; color: #c06060; }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--surface2);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+  }
+
+  .btn-primary:hover { background: var(--border); }
+
+  .btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn-cancel:hover { color: var(--text-secondary); }
+
+  /* ── STATS ── */
+  .stats {
+    max-width: 900px;
+    margin: 28px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .stat-num.green { color: var(--green-glow); }
+  .stat-num.yellow { color: #b0b050; }
+  .stat-num.red { color: #c06060; }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── EDIT MONTH HINT ── */
+  .edit-hint {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .edit-hint strong { color: var(--text-secondary); }
+  .hint-arrow { color: var(--green-glow); font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .day-cell { min-height: 70px; padding: 6px; }
+    .day-num { font-size: 12px; }
+    .stats { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="label">Jadwal</div>
+    <h1>Paid <span>Promote</span></h1>
+  </div>
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">&#8249;</button>
+    <span id="monthLabel">Mei 2025</span>
+    <button onclick="changeMonth(1)">&#8250;</button>
+  </div>
+</div>
+
+<!-- EDIT HINT -->
+<div class="edit-hint">
+  <span class="hint-arrow">↑</span>
+  <span>Untuk ganti bulan, tekan tombol <strong>&lsaquo;</strong> dan <strong>&rsaquo;</strong> di pojok kanan atas. Klik tanggal mana saja untuk mengisi atau mengedit slot paid promote.</span>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot dot-free"></div> Tersedia (2 slot kosong)</div>
+  <div class="legend-item"><div class="legend-dot dot-half"></div> Sisa 1 slot</div>
+  <div class="legend-item"><div class="legend-dot dot-full"></div> Full slot</div>
+</div>
+
+<!-- CALENDAR -->
+<div class="calendar-wrap">
+  <div class="day-headers">
+    <div class="day-header">Min</div>
+    <div class="day-header">Sen</div>
+    <div class="day-header">Sel</div>
+    <div class="day-header">Rab</div>
+    <div class="day-header">Kam</div>
+    <div class="day-header">Jum</div>
+    <div class="day-header">Sab</div>
+  </div>
+  <div class="calendar-grid" id="calendarGrid"></div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-num green" id="statFree">0</div>
+    <div class="stat-label">Hari Tersedia</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num yellow" id="statHalf">0</div>
+    <div class="stat-label">Sisa 1 Slot</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num red" id="statFull">0</div>
+    <div class="stat-label">Full Slot</div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Edit Slot</div>
+    <div class="modal-date" id="modalDate"></div>
+
+    <div class="slot-section">
+      <div class="slot-label">Slot 1</div>
+      <div class="slot-input-row">
+        <input type="text" class="slot-input" id="slot1Input" placeholder="Nama / brand...">
+        <button class="slot-clear" onclick="clearSlot(1)" title="Hapus slot 1">×</button>
+      </div>
+    </div>
+
+    <div class="slot-section">
+      <div class="slot-label">Slot 2</div>
+      <div class="slot-input-row">
+        <input type="text" class="slot-input" id="slot2Input" placeholder="Nama / brand...">
+        <button class="slot-clear" onclick="clearSlot(2)" title="Hapus slot 2">×</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="saveSlots()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  // currentYear/Month: what's displayed
+  // Bulan Mei = index 4 (0-based), year = 2025 (sesuai prompt)
+  let currentYear = 2025;
+  let currentMonth = 4; // 0 = Jan, 4 = Mei
+
+  // scheduleData[key] = { slot1: string, slot2: string }
+  // key format: "YYYY-MM-DD"
+  let scheduleData = JSON.parse(localStorage.getItem('ppSchedule') || '{}');
+
+  let activeDate = null;
+
+  const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni',
+                     'Juli','Agustus','September','Oktober','November','Desember'];
+
+  function saveToStorage() {
+    localStorage.setItem('ppSchedule', JSON.stringify(scheduleData));
+  }
+
+  function dateKey(y, m, d) {
+    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+
+  function changeMonth(dir) {
+    currentMonth += dir;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    document.getElementById('monthLabel').textContent =
+      `${MONTHS_ID[currentMonth]} ${currentYear}`;
+
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0=Sun
+    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    const today = new Date();
+    const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
+    const todayDate = isCurrentMonth ? today.getDate() : -1;
+
+    let free = 0, half = 0, full = 0;
+
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'day-cell empty';
+      grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= totalDays; d++) {
+      const key = dateKey(currentYear, currentMonth, d);
+      const data = scheduleData[key] || { slot1: '', slot2: '' };
+      const s1 = data.slot1.trim();
+      const s2 = data.slot2.trim();
+      const count = (s1 ? 1 : 0) + (s2 ? 1 : 0);
+
+      let state = 'free';
+      if (count === 1) state = 'half';
+      if (count === 2) state = 'full';
+
+      if (state === 'free') free++;
+      else if (state === 'half') half++;
+      else full++;
+
+      const cell = document.createElement('div');
+      cell.className = `day-cell state-${state}${d === todayDate ? ' today' : ''}`;
+      cell.onclick = () => openModal(d);
+
+      let innerHTML = `<div class="day-num">${d}</div><div class="slot-list">`;
+      if (s1) innerHTML += `<div class="slot-item">● ${s1}</div>`;
+      if (s2) innerHTML += `<div class="slot-item">● ${s2}</div>`;
+      innerHTML += `</div>`;
+
+      if (state === 'free') {
+        innerHTML += `<div class="status-badge badge-free">Open</div>`;
+      } else if (state === 'half') {
+        innerHTML += `<div class="status-badge badge-half">Sisa 1</div>`;
+      } else {
+        innerHTML += `<div class="status-badge badge-full">Full</div>`;
+      }
+
+      cell.innerHTML = innerHTML;
+      grid.appendChild(cell);
+    }
+
+    document.getElementById('statFree').textContent = free;
+    document.getElementById('statHalf').textContent = half;
+    document.getElementById('statFull').textContent = full;
+  }
+
+  // ── MODAL ──
+  function openModal(d) {
+    activeDate = d;
+    const key = dateKey(currentYear, currentMonth, d);
+    const data = scheduleData[key] || { slot1: '', slot2: '' };
+
+    document.getElementById('modalTitle').textContent = `Edit — ${d} ${MONTHS_ID[currentMonth]}`;
+    document.getElementById('modalDate').textContent =
+      `${currentYear} · klik simpan untuk menyimpan perubahan`;
+    document.getElementById('slot1Input').value = data.slot1 || '';
+    document.getElementById('slot2Input').value = data.slot2 || '';
+    document.getElementById('modalOverlay').classList.add('open');
+    document.getElementById('slot1Input').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    activeDate = null;
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  function clearSlot(n) {
+    document.getElementById(`slot${n}Input`).value = '';
+  }
+
+  function saveSlots() {
+    if (!activeDate) return;
+    const key = dateKey(currentYear, currentMonth, activeDate);
+    scheduleData[key] = {
+      slot1: document.getElementById('slot1Input').value.trim(),
+      slot2: document.getElementById('slot2Input').value.trim(),
+    };
+    saveToStorage();
+    closeModal();
+    renderCalendar();
+  }
+
+  // Enter key to save
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('modalOverlay').classList.contains('open')) {
+      saveSlots();
+    }
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ── INIT ──
+  renderCalendar();
+</script>
+</body>
+</html>
