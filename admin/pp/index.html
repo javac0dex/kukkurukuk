@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jadwal Paid Promote — Mei 2025</title>
+<title>Jadwal Paid Promote </title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -516,8 +516,8 @@
   // ── STATE ──
   // currentYear/Month: what's displayed
   // Bulan Mei = index 4 (0-based), year = 2025 (sesuai prompt)
-  let currentYear = 2025;
-  let currentMonth = 4; // 0 = Jan, 4 = Mei
+ let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth(); // otomatis bulan sekarang
 
   // scheduleData[key] = { slot1: string, slot2: string }
   // key format: "YYYY-MM-DD"
