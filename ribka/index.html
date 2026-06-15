@@ -3,354 +3,478 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Arena Replay</title>
-    <link rel="icon" type="image/x-icon" href="https://www.idn.app/img/logo-idn.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
-    <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>JKT48 Replay Theater</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
-        body { font-family: "Atkinson Hyperlegible", sans-serif; }
-        .player-stage { position: relative; background: #000; aspect-ratio: 16 / 9; }
-        .player-overlay {
-            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(180deg, rgba(20,23,26,0.18) 0%, rgba(20,23,26,0.78) 100%);
-            transition: opacity 0.25s ease, visibility 0.25s ease; z-index: 20;
-        }
-        .player-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .overlay-play {
-            width: 78px; height: 78px; border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.25); background: rgba(239,68,68,0.92);
-            color: #fff; font-size: 1.8rem; box-shadow: 0 24px 50px rgba(0,0,0,0.35);
-            transition: all 0.2s ease;
-        }
-        .overlay-play:hover { transform: scale(1.08); background: rgba(220,38,38,0.98); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .iklan-box {
-            background: #2c2e31;
-            border: 2px dashed #f97316;
-            border-radius: 16px;
-            padding: 16px;
-            margin-top: 20px;
-            text-align: center;
-            color: #fbbf24;
-            font-weight: 600;
-        }
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: #14171a;
+    color: #d1d5db;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-user-select: none;
+    user-select: none;
+}
 
-        #mobileTapTarget {
-            display: none;
-            position: absolute;
-            left: 20%;
-            top: 25%;
-            width: 60%;
-            height: 50%;
-            z-index: 2147483646;
-        }
+input { -webkit-user-select: text; user-select: text; }
 
-        #watermark {
-            position: absolute;
-            font-weight: bold;
-            color: rgba(255, 255, 255, 0.6);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            pointer-events: none;
-            z-index: 2147483647;
-            user-select: none;
-            white-space: nowrap;
-        }
+/* HEADER */
+header {
+    background: #2c2e31;
+    border-bottom: 1px solid #374151;
+    padding: 12px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+}
+
+header h1 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+header span {
+    color: #ef4444;
+}
+
+/* MAIN LAYOUT */
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 16px;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    main {
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 24px 24px;
+    }
+}
+
+/* PLAYER SECTION */
+.player-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.player-shell {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #374151;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    background:
+        radial-gradient(circle at top left, rgba(239,68,68,0.2), transparent 32%),
+        radial-gradient(circle at top right, rgba(125,58,41,0.24), transparent 26%),
+        linear-gradient(180deg, #1a1d20 0%, #101214 100%);
+}
+
+.player-stage {
+    position: relative;
+    background: #000;
+    aspect-ratio: 16 / 9;
+}
+
+#ytPlayer {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+}
+
+/* OVERLAY */
+.player-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(20,23,26,0.18) 0%, rgba(20,23,26,0.82) 100%);
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.player-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.overlay-title {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 0 24px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.overlay-play {
+    width: 78px;
+    height: 78px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(239,68,68,0.92);
+    color: #fff;
+    font-size: 1.5rem;
+    box-shadow: 0 24px 50px rgba(0,0,0,0.35);
+    transition: transform 0.2s ease, background 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.overlay-play:hover {
+    transform: scale(1.06);
+    background: rgba(220,38,38,0.98);
+}
+
+/* NOW PLAYING BAR */
+.now-playing {
+    background: #1e2124;
+    border: 1px solid #374151;
+    border-top: none;
+    border-radius: 0 0 20px 20px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 58px;
+}
+
+.now-playing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #ef4444;
+    flex-shrink: 0;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.now-playing-dot.idle {
+    background: #4b5563;
+    animation: none;
+}
+
+.now-playing-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.now-playing-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.now-playing-label.idle {
+    color: #6b7280;
+}
+
+.now-playing-name {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* SIDEBAR */
+.replay-sidebar {
+    width: 100%;
+    background: #2c2e31;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .replay-sidebar {
+        width: 340px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 72px;
+        max-height: calc(100vh - 88px);
+    }
+}
+
+.sidebar-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header h2 {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.sidebar-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: #9ca3af;
+    background: #1e2124;
+    border-radius: 999px;
+    padding: 2px 10px;
+}
+
+.replay-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(239,68,68,0.6) rgba(255,255,255,0.04);
+}
+
+.replay-list::-webkit-scrollbar { width: 6px; }
+.replay-list::-webkit-scrollbar-track { background: transparent; }
+.replay-list::-webkit-scrollbar-thumb {
+    background: rgba(239,68,68,0.6);
+    border-radius: 999px;
+}
+
+/* REPLAY CARD */
+.replay-card {
+    border: 1px solid rgba(255,255,255,0.07);
+    background: linear-gradient(180deg, rgba(72,76,78,0.25) 0%, rgba(44,46,49,0.85) 100%);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    overflow: hidden;
+}
+
+.replay-card:hover {
+    border-color: rgba(239,68,68,0.5);
+    transform: translateY(-1px);
+    background: linear-gradient(180deg, rgba(127,29,29,0.3) 0%, rgba(44,46,49,0.9) 100%);
+}
+
+.replay-card.active {
+    border-color: rgba(239,68,68,0.8);
+    background: linear-gradient(180deg, rgba(127,29,29,0.4) 0%, rgba(44,46,49,0.95) 100%);
+}
+
+.replay-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+}
+
+.replay-thumb {
+    width: 80px;
+    height: 45px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #111;
+}
+
+.replay-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.replay-card-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.replay-card-meta {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 3px;
+}
+
+.replay-card.active .replay-card-title { color: #fca5a5; }
+.replay-card.active .replay-card-meta { color: #ef4444; }
+
+.play-icon {
+    color: #6b7280;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.replay-card:hover .play-icon,
+.replay-card.active .play-icon {
+    color: #ef4444;
+}
+
+/* FOOTER */
+footer {
+    background: #2c2e31;
+    border-top: 1px solid #374151;
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    color: #4b5563;
+}
     </style>
 </head>
-<body class="bg-[#14171a] text-gray-300 flex flex-col min-h-screen">
+<body>
 
-    <header class="bg-[#2c2e31] border-b border-gray-700 sticky top-0 z-30">
-        <div class="flex items-center justify-between gap-3 max-w-7xl mx-auto px-4 py-3">
-            <a href="#"><img src="https://www.idn.app/_next/static/media/logo_light.d99f40cc.svg" alt="IDN Live" class="h-9"></a>
-        </div>
+    <header>
+        <h1>JKT48 <span>Replay Theater</span></h1>
     </header>
 
-    <main class="max-w-5xl mx-auto w-full p-4">
-        <div class="player-shell rounded-[28px] overflow-hidden border border-gray-800 shadow-2xl">
-            <div class="player-stage" id="playerStage">
-                <media-player id="replayPlayer" class="replay-media-player"
-                              view-type="video"
-                              stream-type="on-demand"
-                              playsinline
-                              crossorigin>
-                    <media-provider></media-provider>
-                    <media-video-layout small-layout-when="never"></media-video-layout>
-                    <div id="mobileTapTarget"></div>
-                    <div id="watermark" style="display:none;">
-                        arenareplay.my.id
+    <main>
+        <!-- Player -->
+        <div class="player-section">
+            <div class="player-shell">
+                <div class="player-stage">
+                    <iframe
+                        id="ytPlayer"
+                        src=""
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                    ></iframe>
+                    <div id="playerOverlay" class="player-overlay">
+                        <div class="overlay-title">Pilih replay dari daftar →</div>
+                        <button id="overlayPlayButton" class="overlay-play" type="button" aria-label="Putar replay">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
                     </div>
-                </media-player>
-
-                <div id="playerOverlay" class="player-overlay">
-                    <button id="overlayPlayButton" class="overlay-play">
-                        <i class="fa-solid fa-play"></i>
-                    </button>
+                </div>
+                <div class="now-playing" id="nowPlayingBar">
+                    <div class="now-playing-dot idle" id="nowDot"></div>
+                    <div class="now-playing-text">
+                        <div class="now-playing-label idle" id="nowLabel">Belum Diputar</div>
+                        <div class="now-playing-name" id="nowName">Pilih replay dari daftar</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="mt-5 px-1">
-            <p id="playerStatus" class="uppercase tracking-[0.3em] text-[11px] text-red-400 font-bold">REPLAY READY</p>
-            <h1 id="replayTitle" class="text-white text-3xl font-bold"> </h1>
-            <p id="replayDate" class="text-gray-400 text-sm"> </p>
-        </div>
-
-        <div class="iklan-box">
-            <a href="https://arenareplay.my.id/" target="_blank">
-                <img
-                    src="https://i.ibb.co/xSGYwHfv/pasang-iklan-mu-disini-1.png"
-                    alt="PASANG IKLAN DISINI"
-                    class="w-full h-auto rounded-md"
-                    style="width:100%; height:auto; display:block; border-radius:6px;"
-                >
-            </a>
-        </div>
+        <!-- Sidebar -->
+        <aside class="replay-sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-film" style="color:#ef4444; font-size:0.9rem;"></i>
+                <h2>Daftar Replay</h2>
+                <span class="sidebar-count" id="replayCount">2 video</span>
+            </div>
+            <div class="replay-list" id="replayList"></div>
+        </aside>
     </main>
 
-    <script type="module" src="https://cdn.vidstack.io/player"></script>
-
-    <!-- Ad redirect on click -->
-    <script>
-        var links = [
-            "https://s.shopee.co.id/20rVZGM43C",
-            "https://s.shopee.co.id/4Aw7rZTpvo",
-            "https://s.shopee.co.id/3qJ9jIFPPf",
-            "https://s.shopee.co.id/4fsGj5Ymeb",
-            "https://s.shopee.co.id/9fH1WaO9Kq"
-        ];
-        var delay = 400000;
-        document.addEventListener("click", function() {
-            var lastOpen = localStorage.getItem("lastAdOpen");
-            var now = Date.now();
-            if (!lastOpen || now - lastOpen > delay) {
-                var randomLink = links[Math.floor(Math.random() * links.length)];
-                window.open(randomLink, "_blank");
-                localStorage.setItem("lastAdOpen", now);
-            }
-        });
-    </script>
+    <footer>
+        JKT48 Request Hour 2026 &mdash; Replay Theater
+    </footer>
 
     <script>
-        if (!(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768)) {
-            let devToolsOpen = false;
+const REPLAYS = [
+    {
+        id: "MSpvZ_eVqlk",
+        title: "JKT48 Request Hour 2026 SHOW 1",
+        meta: "Request Hour 2026"
+    },
+    {
+        id: "WGxUOXgPz60",
+        title: "JKT48 Request Hour 2026 SHOW 2",
+        meta: "Request Hour 2026"
+    }
+];
 
-            function detectDevTools() {
-                const widthDiff = window.outerWidth - window.innerWidth;
-                const heightDiff = window.outerHeight - window.innerHeight;
-                if ((widthDiff > 160 || heightDiff > 160) && !devToolsOpen) {
-                    devToolsOpen = true;
-                    document.body.innerHTML = `
-                        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
-                            <div>
-                                <h1 style="font-size:2rem;margin-bottom:1rem;">🚫 Mau ngapain?</h1>
-                                <p>Developer tools terdeteksi.</p>
-                            </div>
-                        </div>`;
-                    setTimeout(() => window.location.href = 'https://www.youtube.com/watch?v=4ckrU8qqblY', 800);
-                }
-            }
+let currentIndex = null;
 
-            function blockDevToolsKeys(e) {
-                const blocked = [
-                    e.key === 'F12' || e.keyCode === 123,
-                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
-                    (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')),
-                    (e.ctrlKey && e.key === 'U') || (e.metaKey && e.key === 'U')
-                ];
-                if (blocked.some(Boolean)) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    return false;
-                }
-            }
+function getThumb(id) {
+    return `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+}
 
-            document.addEventListener('contextmenu', e => e.preventDefault());
-            document.addEventListener('keydown', blockDevToolsKeys, true);
-            window.addEventListener('keydown', blockDevToolsKeys, true);
-            setInterval(detectDevTools, 500);
-        }
-    </script>
+function getEmbedUrl(id) {
+    return `https://www.youtube.com/embed/watch?v=${id}&autoplay=1&rel=0`;
+}
 
-    <script>
-        const state = { allReplays: [], filteredReplays: [], currentReplay: null };
+function renderList() {
+    const list = document.getElementById("replayList");
+    list.innerHTML = "";
+    REPLAYS.forEach((r, i) => {
+        const card = document.createElement("div");
+        card.className = "replay-card" + (currentIndex === i ? " active" : "");
+        card.innerHTML = `
+            <div class="replay-card-inner">
+                <img class="replay-thumb" src="${getThumb(r.id)}" alt="${r.title}" loading="lazy">
+                <div class="replay-card-info">
+                    <div class="replay-card-title">${r.title}</div>
+                    <div class="replay-card-meta">${r.meta}</div>
+                </div>
+                <i class="fa-solid ${currentIndex === i ? 'fa-circle-play' : 'fa-play'} play-icon"></i>
+            </div>
+        `;
+        card.addEventListener("click", () => loadReplay(i));
+        list.appendChild(card);
+    });
+}
 
-        const elements = {
-            replayPlayer:      document.getElementById("replayPlayer"),
-            replayTitle:       document.getElementById("replayTitle"),
-            replayDate:        document.getElementById("replayDate"),
-            playerStatus:      document.getElementById("playerStatus"),
-            overlayPlayButton: document.getElementById("overlayPlayButton"),
-            playerOverlay:     document.getElementById("playerOverlay"),
-            playerStage:       document.getElementById("playerStage")
-        };
+function loadReplay(index) {
+    currentIndex = index;
+    const r = REPLAYS[index];
 
-        function formatDate(dateString) {
-            if (!dateString) return "—";
-            try {
-                return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dateString));
-            } catch { return dateString; }
-        }
+    // Embed YouTube with autoplay
+    document.getElementById("ytPlayer").src = getEmbedUrl(r.id);
 
-        function toggleOverlay(show) {
-            show
-                ? elements.playerOverlay.classList.remove("hidden")
-                : elements.playerOverlay.classList.add("hidden");
-        }
+    // Hide overlay
+    document.getElementById("playerOverlay").classList.add("hidden");
 
-        function loadReplayIntoPlayer(replay) {
-            state.currentReplay = replay;
-            elements.replayTitle.textContent = replay.judul || " ";
-            elements.replayDate.textContent   = formatDate(replay.tanggal);
-            // Langsung set URL m3u8 ke src player
-            elements.replayPlayer.src = replay.videoUrl;
-            toggleOverlay(true);
-        }
+    // Update now playing
+    document.getElementById("nowDot").classList.remove("idle");
+    document.getElementById("nowLabel").classList.remove("idle");
+    document.getElementById("nowLabel").textContent = "Now Playing";
+    document.getElementById("nowName").textContent = r.title;
 
-        function init() {
-            state.allReplays = [
-                {
-                    id: "1",
-                    videoUrl: "https://theater.48intens.id/LAvLECoxZMx4RpGcchMabw/1780768934/s1~itadakilove060626_2~720/index.m3u8"
-                }
-            ];
-            state.filteredReplays = [...state.allReplays];
-            if (state.allReplays.length > 0) loadReplayIntoPlayer(state.allReplays[0]);
+    // Re-render list to update active state
+    renderList();
+}
 
-            const player  = elements.replayPlayer;
-            const overlay = elements.playerOverlay;
-            let overlayRemoved = false;
+// Overlay play button — play first if none selected, else replay current
+document.getElementById("overlayPlayButton").addEventListener("click", () => {
+    if (currentIndex === null) {
+        loadReplay(0);
+    } else {
+        loadReplay(currentIndex);
+    }
+});
 
-            function removeOverlayPermanently() {
-                if (!overlayRemoved) {
-                    overlayRemoved = true;
-                    overlay.remove();
-                }
-            }
-
-            player.addEventListener("play", () => {
-                toggleOverlay(false);
-                setTimeout(removeOverlayPermanently, 300);
-            });
-
-            player.addEventListener("ended", () => {});
-
-            elements.overlayPlayButton.addEventListener("click", (e) => {
-                e.stopPropagation();
-                elements.overlayPlayButton.blur();
-                player.play().catch(() => {});
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if ((e.code === 'Space' || e.key === ' ') && player && player.src) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    player.paused ? player.play().catch(() => {}) : player.pause();
-                }
-            }, true);
-        }
-
-        document.addEventListener("DOMContentLoaded", init);
-
-        // ── MOBILE FULLSCREEN TAP FIX ─────────────────────────────────────────
-        const mobileTap = document.getElementById('mobileTapTarget');
-        const replayP   = document.getElementById('replayPlayer');
-
-        function isMobileUA() {
-            return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-                   || window.innerWidth <= 768;
-        }
-
-        function syncMobileTap() {
-            const inFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
-            mobileTap.style.display = (isMobileUA() && inFs) ? 'block' : 'none';
-        }
-
-        mobileTap.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            replayP.paused ? replayP.play().catch(() => {}) : replayP.pause();
-        }, { passive: false });
-
-        document.addEventListener('fullscreenchange',       syncMobileTap);
-        document.addEventListener('webkitfullscreenchange', syncMobileTap);
-        // ── END MOBILE FULLSCREEN TAP FIX ─────────────────────────────────────
-
-        // ── WATERMARK ─────────────────────────────────────────────────────────
-        const watermark = document.getElementById('watermark');
-        const playerEl  = document.getElementById('replayPlayer');
-
-        const SHOW_DURATION = 10000;
-        const HIDE_DURATION = 5 * 60 * 1000;
-
-        let watermarkHideTimeout;
-        let watermarkTimeout;
-        let isWatermarkActive = false;
-
-        function isMobileDevice() {
-            return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-                   || window.innerWidth < 768;
-        }
-
-        function applyResponsiveStyle() {
-            const fs = isMobileDevice() ? '14px' : '18px';
-            const sh = isMobileDevice() ? '1px 1px 4px rgba(0,0,0,0.8)' : '2px 2px 4px rgba(0,0,0,0.8)';
-            watermark.style.fontSize   = fs;
-            watermark.style.textShadow = sh;
-        }
-
-        function getRandomPosition() {
-            const pw = playerEl.offsetWidth  || 640;
-            const ph = playerEl.offsetHeight || 360;
-            const ww = watermark.offsetWidth  || 160;
-            const wh = watermark.offsetHeight || 24;
-            const pad  = 20;
-            const maxX = Math.max(pad, pw - ww - pad);
-            const maxY = Math.max(pad, ph - wh - pad);
-            return {
-                x: pad + Math.random() * (maxX - pad),
-                y: pad + Math.random() * (maxY - pad)
-            };
-        }
-
-        function positionWatermark() {
-            const pos = getRandomPosition();
-            watermark.style.left = pos.x + 'px';
-            watermark.style.top  = pos.y + 'px';
-        }
-
-        function showWatermark() {
-            clearTimeout(watermarkHideTimeout);
-            clearTimeout(watermarkTimeout);
-            applyResponsiveStyle();
-            watermark.style.display = 'block';
-            isWatermarkActive = true;
-            positionWatermark();
-            watermarkHideTimeout = setTimeout(() => {
-                watermark.style.display = 'none';
-                isWatermarkActive       = false;
-                watermarkTimeout = setTimeout(showWatermark, HIDE_DURATION);
-            }, SHOW_DURATION);
-        }
-
-        function onFullscreenChange() {
-            if (isWatermarkActive) setTimeout(positionWatermark, 100);
-        }
-
-        document.addEventListener('fullscreenchange',       onFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-        document.addEventListener('mozfullscreenchange',    onFullscreenChange);
-
-        window.addEventListener('resize', () => {
-            if (isWatermarkActive) {
-                applyResponsiveStyle();
-                positionWatermark();
-            }
-        });
-
-        showWatermark();
+// Init
+renderList();
     </script>
 </body>
 </html>
