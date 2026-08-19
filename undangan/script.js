@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- RSVP (terhubung ke Google Sheet via Apps Script) ---------- */
   // EDIT: ganti dengan URL Web App Apps Script Anda (lihat google-apps-script.gs)
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/GANTI_DENGAN_ID_DEPLOYMENT_ANDA/exec';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyzzpr2mAa09fH0hPWadrYL4hOxHzz0II5DWYIQNRQAHV36rw9rytXvYBJXQSq7dai-/exec';
 
   const rsvpForm = document.getElementById('rsvpForm');
   const rsvpList = document.getElementById('rsvpList');
