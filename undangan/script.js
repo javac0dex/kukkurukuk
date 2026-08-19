@@ -58,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------- Countdown ---------- */
-  // EDIT: ganti tanggal & waktu acara di sini (format ISO: YYYY-MM-DDTHH:mm:ss)
   const eventDate = new Date('2026-06-20T08:00:00');
 
   function updateCountdown() {
@@ -80,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateCountdown, 1000);
 
   /* ---------- RSVP (terhubung ke Google Sheet via Apps Script) ---------- */
-  // EDIT: ganti dengan URL Web App Apps Script Anda (lihat google-apps-script.gs)
   const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxucWVFFkMwdLzmsn5wUWdQsh003zOGeaORZf3wlNWZa_pZCxIwZh3xw8P41fQZyVmuoA/exec';
 
   const rsvpForm = document.getElementById('rsvpForm');
@@ -89,7 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function addRSVPToList(entry, prepend = false) {
     const li = document.createElement('li');
-    const status = entry.attendance === 'hadir' ? 'Akan hadir' : 'Tidak dapat hadir';
+    // Normalisasi value dari select box/form
+    const isHadir = String(entry.attendance).toLowerCase() === 'hadir';
+    const status = isHadir ? 'Akan hadir' : 'Tidak dapat hadir';
+    
     li.innerHTML = `<b>${escapeHTML(entry.name)}</b> — ${status}${entry.message ? `<br>"${escapeHTML(entry.message)}"` : ''}`;
     if (prepend) {
       rsvpList.insertBefore(li, rsvpList.firstChild);
@@ -99,17 +100,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function escapeHTML(str) {
+    if (!str) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   }
 
   async function loadRSVP() {
-    if (GOOGLE_SCRIPT_URL.includes('AKfycbxucWVFFkMwdLzmsn5wUWdQsh003zOGeaORZf3wlNWZa_pZCxIwZh3xw8P41fQZyVmuoA')) return;
     try {
       const res = await fetch(GOOGLE_SCRIPT_URL);
       const entries = await res.json();
       rsvpList.innerHTML = '';
+      // Balik urutan agar data terbaru muncul di paling atas
       entries.slice().reverse().forEach(entry => addRSVPToList(entry));
     } catch (err) {
       console.error('Gagal memuat data RSVP:', err);
@@ -118,11 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   rsvpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    if (GOOGLE_SCRIPT_URL.includes('AKfycbxucWVFFkMwdLzmsn5wUWdQsh003zOGeaORZf3wlNWZa_pZCxIwZh3xw8P41fQZyVmuoA')) {
-      alert('URL Google Apps Script belum diisi. Lihat file google-apps-script.gs untuk instruksi.');
-      return;
-    }
 
     const formData = new FormData(rsvpForm);
     const entry = {
@@ -137,10 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // Apps Script Web App tidak mengembalikan header CORS standar
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(entry)
       });
+      
       addRSVPToList(entry, true);
       rsvpForm.reset();
     } catch (err) {
@@ -156,30 +153,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- Copy account number ---------- */
   const copyBtn = document.getElementById('copyBtn');
-  copyBtn.addEventListener('click', () => {
-    const number = copyBtn.dataset.copy;
-    navigator.clipboard.writeText(number).then(() => {
-      const original = copyBtn.textContent;
-      copyBtn.textContent = 'Tersalin!';
-      setTimeout(() => { copyBtn.textContent = original; }, 1800);
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const number = copyBtn.dataset.copy;
+      navigator.clipboard.writeText(number).then(() => {
+        const original = copyBtn.textContent;
+        copyBtn.textContent = 'Tersalin!';
+        setTimeout(() => { copyBtn.textContent = original; }, 1800);
+      });
     });
-  });
+  }
 
   /* ---------- Share invitation ---------- */
   const shareBtn = document.getElementById('shareBtn');
-  shareBtn.addEventListener('click', async () => {
-    const shareData = {
-      title: document.title,
-      text: 'Anda diundang ke pernikahan kami',
-      url: window.location.href
-    };
-    if (navigator.share) {
-      try { await navigator.share(shareData); } catch (err) { /* user cancelled */ }
-    } else {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        alert('Link undangan disalin ke clipboard!');
-      });
-    }
-  });
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const shareData = {
+        title: document.title,
+        text: 'Anda diundang ke pernikahan kami',
+        url: window.location.href
+      };
+      if (navigator.share) {
+        try { await navigator.share(shareData); } catch (err) { /* user cancelled */ }
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert('Link undangan disalin ke clipboard!');
+        });
+      }
+    });
+  }
 
 });
