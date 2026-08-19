@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- RSVP (terhubung ke Google Sheet via Apps Script) ---------- */
   // EDIT: ganti dengan URL Web App Apps Script Anda (lihat google-apps-script.gs)
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx32VoFzJ-1Vg0UyTPUiGictg7l1N65JTBPFBY6cGo/dev';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxucWVFFkMwdLzmsn5wUWdQsh003zOGeaORZf3wlNWZa_pZCxIwZh3xw8P41fQZyVmuoA/exec';
 
   const rsvpForm = document.getElementById('rsvpForm');
   const rsvpList = document.getElementById('rsvpList');
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadRSVP() {
-    if (GOOGLE_SCRIPT_URL.includes('GANTI_DENGAN_ID_DEPLOYMENT_ANDA')) return;
+    if (GOOGLE_SCRIPT_URL.includes('AKfycbxucWVFFkMwdLzmsn5wUWdQsh003zOGeaORZf3wlNWZa_pZCxIwZh3xw8P41fQZyVmuoA')) return;
     try {
       const res = await fetch(GOOGLE_SCRIPT_URL);
       const entries = await res.json();
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
   rsvpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (GOOGLE_SCRIPT_URL.includes('GANTI_DENGAN_ID_DEPLOYMENT_ANDA')) {
+    if (GOOGLE_SCRIPT_URL.includes('AKfycbxucWVFFkMwdLzmsn5wUWdQsh003zOGeaORZf3wlNWZa_pZCxIwZh3xw8P41fQZyVmuoA')) {
       alert('URL Google Apps Script belum diisi. Lihat file google-apps-script.gs untuk instruksi.');
       return;
     }
