@@ -79,22 +79,23 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  /* ---------- RSVP (stored locally in browser only — no backend) ---------- */
+  /* ---------- RSVP (terhubung ke Google Sheet via Apps Script) ---------- */
+  // EDIT: ganti dengan URL Web App Apps Script Anda (lihat google-apps-script.gs)
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/GANTI_DENGAN_ID_DEPLOYMENT_ANDA/exec';
+
   const rsvpForm = document.getElementById('rsvpForm');
   const rsvpList = document.getElementById('rsvpList');
-  const STORAGE_KEY = 'sage_rsvp_entries';
+  const rsvpSubmitBtn = rsvpForm.querySelector('button[type="submit"]');
 
-  function loadRSVP() {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    rsvpList.innerHTML = '';
-    data.slice().reverse().forEach(addRSVPToList);
-  }
-
-  function addRSVPToList(entry) {
+  function addRSVPToList(entry, prepend = false) {
     const li = document.createElement('li');
     const status = entry.attendance === 'hadir' ? 'Akan hadir' : 'Tidak dapat hadir';
     li.innerHTML = `<b>${escapeHTML(entry.name)}</b> — ${status}${entry.message ? `<br>"${escapeHTML(entry.message)}"` : ''}`;
-    rsvpList.appendChild(li);
+    if (prepend) {
+      rsvpList.insertBefore(li, rsvpList.firstChild);
+    } else {
+      rsvpList.appendChild(li);
+    }
   }
 
   function escapeHTML(str) {
@@ -103,25 +104,54 @@ document.addEventListener('DOMContentLoaded', () => {
     return div.innerHTML;
   }
 
-  rsvpForm.addEventListener('submit', (e) => {
+  async function loadRSVP() {
+    if (GOOGLE_SCRIPT_URL.includes('GANTI_DENGAN_ID_DEPLOYMENT_ANDA')) return;
+    try {
+      const res = await fetch(GOOGLE_SCRIPT_URL);
+      const entries = await res.json();
+      rsvpList.innerHTML = '';
+      entries.slice().reverse().forEach(entry => addRSVPToList(entry));
+    } catch (err) {
+      console.error('Gagal memuat data RSVP:', err);
+    }
+  }
+
+  rsvpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (GOOGLE_SCRIPT_URL.includes('GANTI_DENGAN_ID_DEPLOYMENT_ANDA')) {
+      alert('URL Google Apps Script belum diisi. Lihat file google-apps-script.gs untuk instruksi.');
+      return;
+    }
+
     const formData = new FormData(rsvpForm);
     const entry = {
       name: formData.get('name').trim(),
       attendance: formData.get('attendance'),
-      message: formData.get('message').trim(),
-      date: new Date().toISOString()
+      message: formData.get('message').trim()
     };
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    data.push(entry);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    addRSVPToList(entry);
-    rsvpList.insertBefore(rsvpList.lastChild, rsvpList.firstChild);
-    rsvpForm.reset();
 
-    // NOTE: Untuk menyimpan RSVP ke Google Sheet, ganti blok ini dengan
-    // fetch() ke Google Apps Script Web App URL Anda.
+    rsvpSubmitBtn.disabled = true;
+    rsvpSubmitBtn.textContent = 'Mengirim...';
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Apps Script Web App tidak mengembalikan header CORS standar
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(entry)
+      });
+      addRSVPToList(entry, true);
+      rsvpForm.reset();
+    } catch (err) {
+      alert('Gagal mengirim RSVP. Coba lagi.');
+      console.error(err);
+    } finally {
+      rsvpSubmitBtn.disabled = false;
+      rsvpSubmitBtn.textContent = 'Kirim';
+    }
   });
+
   loadRSVP();
 
   /* ---------- Copy account number ---------- */
