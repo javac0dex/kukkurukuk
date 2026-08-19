@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------- Countdown ---------- */
-  const eventDate = new Date('2026-06-20T08:00:00');
+  const eventDate = new Date('2026-09-06T08:00:00');
 
   function updateCountdown() {
     const now = new Date();
